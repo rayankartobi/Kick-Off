@@ -21,7 +21,7 @@ body{background:var(--dark);display:flex;flex-direction:column;align-items:cente
 canvas{border-radius:10px;display:block;box-shadow:0 0 60px rgba(40,168,90,.25),0 0 120px rgba(0,0,0,.6);}
 #controls{margin-top:10px;color:rgba(255,255,255,.28);font-size:.75rem;letter-spacing:1px;text-align:center;}
 .k{display:inline-block;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:5px;padding:2px 7px;font-weight:700;color:var(--y);margin:0 2px;}
-#nameBadge{display:inline-block;font-size:.75rem;color:var(--y);letter-spacing:2px;padding:5px 16px;background:rgba(245,200,0,.08);border-radius:20px;cursor:pointer;border:1px solid rgba(245,200,0,.25);transition:all .15s;}
+#nameBadge{display:inline-block;font-size:.85rem;color:var(--y);letter-spacing:2px;padding:7px 20px;background:rgba(245,200,0,.08);border-radius:20px;cursor:pointer;border:1px solid rgba(245,200,0,.25);transition:all .15s;}
 #nameBadge:hover{background:rgba(245,200,0,.16);border-color:rgba(245,200,0,.5);transform:translateY(-1px);}
 
 /* ── FLASH ── */
@@ -32,6 +32,7 @@ canvas{border-radius:10px;display:block;box-shadow:0 0 60px rgba(40,168,90,.25),
 /* ── OVERLAYS ── */
 .ov{position:fixed;inset:0;background:rgba(8,15,30,.96);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:13px;backdrop-filter:blur(8px);}
 .ov.on{display:flex;}
+#changeNameMenu{z-index:300;}
 .ovt{font-family:'Black Ops One',cursive;font-size:3.2rem;letter-spacing:8px;color:var(--y);text-shadow:0 0 28px rgba(245,200,0,.5);}
 .ovs{font-size:.88rem;color:rgba(255,255,255,.4);letter-spacing:3px;text-transform:uppercase;}
 .ovf{font-family:'Black Ops One',cursive;font-size:5rem;color:var(--white);line-height:1;}
@@ -442,14 +443,16 @@ function renderLobby(isHost){
   const rSlots=lobbySlots.filter(s=>s.team==='red');
   renderSlotColumn('greenSlots',gSlots,isHost,'green');
   renderSlotColumn('redSlots',rSlots,isHost,'red');
-  // Check if game is startable
   const hasGuest=lobbySlots.some(s=>s.type==='human'&&!s.isMe);
+  const hasAnyOpponent=lobbySlots.some(s=>s.team==='red'&&(s.type==='human'||s.type==='bot'));
   const startBtn=document.getElementById('btnLobbyStart');
   if(isHost){
     startBtn.style.display='inline-block';
-    startBtn.disabled=!hasGuest;
-    startBtn.style.opacity=hasGuest?'1':'0.4';
-    document.getElementById('lobbyStatus').textContent=hasGuest?'Opponent joined! Ready to start.':'Waiting for opponent to join...';
+    startBtn.disabled=!hasAnyOpponent;
+    startBtn.style.opacity=hasAnyOpponent?'1':'0.4';
+    if(hasGuest) document.getElementById('lobbyStatus').textContent='Opponent joined! Ready to start.';
+    else if(hasAnyOpponent) document.getElementById('lobbyStatus').textContent='Ready to play vs bots!';
+    else document.getElementById('lobbyStatus').textContent='Add bots or wait for a player to join...';
   }else{
     startBtn.style.display='none';
     document.getElementById('lobbyStatus').textContent='Waiting for host to start...';
@@ -563,17 +566,34 @@ function drawField(){
   for(let i=1;i<4;i++){const ny=GT+(GOAL_H/4)*i;ctx.beginPath();ctx.moveTo(0,ny);ctx.lineTo(GOAL_D,ny);ctx.stroke();ctx.beginPath();ctx.moveTo(W,ny);ctx.lineTo(W-GOAL_D,ny);ctx.stroke();}
 }
 
-function drawPlayer(p,label,isControlled){
+function drawPlayer(p,label,isControlled,nameTag){
   if(p.disabled)return;
   ctx.fillStyle='rgba(0,0,0,.2)';ctx.beginPath();ctx.ellipse(p.x+2,p.y+p.r-1,p.r*.72,p.r*.28,0,0,Math.PI*2);ctx.fill();
   if(isControlled){ctx.shadowColor=p.hlColor;ctx.shadowBlur=14;}
   const g=ctx.createRadialGradient(p.x-4,p.y-4,2,p.x,p.y,p.r);
   g.addColorStop(0,lighten(p.color,55));g.addColorStop(1,p.color);
   ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
-  if(p.isRemote){ctx.fillStyle='rgba(255,200,0,.9)';ctx.font='9px serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText('★',p.x,p.y-p.r-1);}
+  // Name tag above player
+  if(nameTag){
+    ctx.font=`bold 9px 'Barlow Condensed',sans-serif`;ctx.textAlign='center';
+    // Star for remote/opponent — drawn higher up
+    if(p.isRemote){
+      ctx.fillStyle='rgba(255,200,0,.95)';ctx.font='9px serif';ctx.textBaseline='bottom';
+      ctx.fillText('★',p.x,p.y-p.r-14);
+    }
+    // Name label just above the circle
+    ctx.font=`bold 9px 'Barlow Condensed',sans-serif`;ctx.textBaseline='bottom';
+    const tw=ctx.measureText(nameTag).width;
+    const bx=p.x-tw/2-3,by=p.y-p.r-(p.isRemote?13:4)-11,bw=tw+6,bh=12,br=3;
+    ctx.fillStyle='rgba(0,0,0,.55)';ctx.beginPath();ctx.moveTo(bx+br,by);ctx.lineTo(bx+bw-br,by);ctx.arcTo(bx+bw,by,bx+bw,by+br,br);ctx.lineTo(bx+bw,by+bh-br);ctx.arcTo(bx+bw,by+bh,bx+bw-br,by+bh,br);ctx.lineTo(bx+br,by+bh);ctx.arcTo(bx,by+bh,bx,by+bh-br,br);ctx.lineTo(bx,by+br);ctx.arcTo(bx,by,bx+br,by,br);ctx.closePath();ctx.fill();
+    ctx.fillStyle=isControlled?p.hlColor:'rgba(255,255,255,.9)';
+    ctx.fillText(nameTag,p.x,p.y-p.r-(p.isRemote?13:4));
+  }
   if(p.carrying){ctx.strokeStyle=p.team==='left'?'rgba(245,200,0,.85)':'rgba(255,255,255,.6)';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(p.x,p.y,p.r+4,0,Math.PI*2);ctx.stroke();}
   if(p.kicking>0){ctx.strokeStyle=`rgba(255,255,255,${p.kicking/8})`;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(p.x,p.y,p.r+7,0,Math.PI*2);ctx.stroke();}
-  ctx.fillStyle='rgba(255,255,255,.95)';ctx.font=`bold 8px 'Barlow Condensed',sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,p.x,p.y);
+  // Short label inside circle (role indicator)
+  ctx.fillStyle='rgba(255,255,255,.85)';ctx.font=`bold 8px 'Barlow Condensed',sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(label,p.x,p.y);
 }
 
 function drawBall(b){
@@ -700,12 +720,24 @@ let passHintTimer=0;
 function showPassHint(t){document.getElementById('passTarget').textContent=`Bot ${leftTeam.indexOf(t)}`;document.getElementById('passHint').classList.add('on');passHintTimer=80;}
 
 // ═══════ GOAL / GAME OVER ═══════
+// Resets positions only, keeps team structure intact
+function resetPositions(){
+  const form=FORMATIONS[onlineTeamSize||teamSize];
+  form.forEach((pos,i)=>{
+    const lx=PAD+GOAL_D+(pos.x*(W/2-PAD-GOAL_D)),ly=pos.y*H;
+    const rx=W-(PAD+GOAL_D)-(pos.x*(W/2-PAD-GOAL_D)),ry=pos.y*H;
+    if(leftTeam[i]){leftTeam[i].x=lx;leftTeam[i].y=ly;leftTeam[i].homeX=lx;leftTeam[i].homeY=ly;leftTeam[i].carrying=false;leftTeam[i].kicking=0;}
+    if(rightTeam[i]){rightTeam[i].x=rx;rightTeam[i].y=ry;rightTeam[i].homeX=rx;rightTeam[i].homeY=ry;rightTeam[i].carrying=false;rightTeam[i].kicking=0;}
+  });
+  ball.x=W/2;ball.y=H/2;ball.vx=0;ball.vy=0;ball.owner=null;
+}
+
 function flashGoal(msg,team){
   goalCD=130;allPlayers().forEach(p=>{p.carrying=false;});ball.owner=null;
   document.getElementById('scL').textContent=scoreL;document.getElementById('scR').textContent=scoreR;
   if(mpMode==='host'&&roomRef)set(ref(db,`rooms/${roomCode}/goal`),{msg,team,sL:scoreL,sR:scoreR,ts:Date.now()}).catch(()=>{});
   triggerFlash(msg,team);
-  setTimeout(()=>{document.getElementById('message').classList.remove('show');if(scoreL>=5||scoreR>=5)endGame();else{spawnTeams(onlineTeamSize||teamSize);goalCD=0;}},1900);
+  setTimeout(()=>{document.getElementById('message').classList.remove('show');if(scoreL>=5||scoreR>=5)endGame();else{resetPositions();goalCD=0;}},1900);
 }
 function triggerFlash(msg,team){
   const el=document.getElementById('message');
@@ -773,11 +805,17 @@ async function hostRoom(){
   await set(roomRef,{status:'waiting',teamSize:n,hostName:myName,ts:serverTimestamp()});
   onDisconnect(roomRef).remove();
 
-  // Watch for guest joining
+  // Watch for guest joining OR leaving
   onValue(ref(db,`rooms/${roomCode}/guestName`),(snap)=>{
-    const gn=snap.val();if(!gn)return;
-    guestName=gn;
-    guestJoinLobby(gn);
+    const gn=snap.val();
+    if(gn){
+      // Guest joined
+      guestName=gn;
+      guestJoinLobby(gn);
+    }else{
+      // Guest left — remove all non-isMe human slots
+      lobbySlots.forEach(s=>{if(s.type==='human'&&!s.isMe){s.type='empty';s.name='';}});
+    }
     pushLobbyToFirebase();
     renderLobby(true);
   });
@@ -984,8 +1022,19 @@ function gameLoop(){
   const carrier=allPlayers().find(p=>p.carrying);
   if(carrier){ctx.fillStyle=carrier.team==='left'?'rgba(245,200,0,.22)':'rgba(255,80,96,.22)';ctx.beginPath();ctx.arc(ball.x,ball.y,BR+8,0,Math.PI*2);ctx.fill();}
   drawBall(ball);
-  leftTeam.forEach((p,i)=>drawPlayer(p,i===0?(mpMode==='local'?'YOU':myName.substring(0,4)):`A${i}`,i===0&&mpMode!=='guest'));
-  rightTeam.forEach((p,i)=>drawPlayer(p,i===0?(mpMode==='guest'?myName.substring(0,4):'C1'):`C${i+1}`,i===0&&mpMode==='guest'));
+  // Build per-player name tags from lobby slots when online
+  const greenNames=lobbySlots.filter(s=>s.team==='green').map(s=>s.type==='human'?s.name:'');
+  const redNames=lobbySlots.filter(s=>s.team==='red').map(s=>s.type==='human'?s.name:'');
+  leftTeam.forEach((p,i)=>{
+    const shortLabel=i===0?(mpMode==='local'?'YOU':myName.substring(0,3)):`B${i}`;
+    const nameTag=mpMode==='local'?(i===0?myName:null):(greenNames[i]||null);
+    drawPlayer(p,shortLabel,i===0&&mpMode!=='guest',nameTag);
+  });
+  rightTeam.forEach((p,i)=>{
+    const shortLabel=i===0?(mpMode==='guest'?myName.substring(0,3):'C1'):`C${i+1}`;
+    const nameTag=mpMode==='local'?null:(redNames[i]||null);
+    drawPlayer(p,shortLabel,i===0&&mpMode==='guest',nameTag);
+  });
   requestAnimationFrame(gameLoop);
 }
 
