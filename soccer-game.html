@@ -937,9 +937,10 @@ function backToLobby(){
   hideAll();
   show('roomLobbyScreen');
 }
+
+function togglePause(){
   paused=!paused;
   if(paused){
-    // Show "Back to Lobby" only in online mode
     document.getElementById('btnBackLobbyPause').style.display=mpMode!=='local'?'block':'none';
     document.getElementById('btnRestart').style.display=mpMode==='local'?'block':'none';
     show('pauseMenu');
