@@ -21,8 +21,8 @@ body{background:var(--dark);display:flex;flex-direction:column;align-items:cente
 canvas{border-radius:10px;display:block;box-shadow:0 0 60px rgba(40,168,90,.25),0 0 120px rgba(0,0,0,.6);}
 #controls{margin-top:10px;color:rgba(255,255,255,.28);font-size:.75rem;letter-spacing:1px;text-align:center;}
 .k{display:inline-block;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:5px;padding:2px 7px;font-weight:700;color:var(--y);margin:0 2px;}
-#nameBadge{display:inline-block;font-size:.72rem;color:var(--y);letter-spacing:2px;padding:3px 10px;background:rgba(245,200,0,.08);border-radius:20px;cursor:pointer;border:1px solid rgba(245,200,0,.25);transition:all .15s;margin-left:6px;}
-#nameBadge:hover{background:rgba(245,200,0,.16);border-color:rgba(245,200,0,.5);}
+#nameBadge{display:inline-block;font-size:.75rem;color:var(--y);letter-spacing:2px;padding:5px 16px;background:rgba(245,200,0,.08);border-radius:20px;cursor:pointer;border:1px solid rgba(245,200,0,.25);transition:all .15s;}
+#nameBadge:hover{background:rgba(245,200,0,.16);border-color:rgba(245,200,0,.5);transform:translateY(-1px);}
 
 /* ── FLASH ── */
 #message{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-family:'Black Ops One',cursive;font-size:3rem;color:var(--y);text-shadow:0 0 40px rgba(245,200,0,.9);pointer-events:none;z-index:150;letter-spacing:8px;white-space:nowrap;}
@@ -153,8 +153,7 @@ input.name-in{width:220px;font-size:1.1rem;letter-spacing:3px;}
   <span class="k">SPACE</span> Shoot &nbsp;·&nbsp;
   <span class="k">Q</span> Pass &nbsp;·&nbsp;
   <span class="k">SHIFT</span> Sprint &nbsp;·&nbsp;
-  <span class="k">ESC</span> Pause &nbsp;·&nbsp;
-  <span id="nameBadge">✏ NAME</span>
+  <span class="k">ESC</span> Pause
 </div>
 <div id="message"></div>
 
@@ -184,6 +183,7 @@ input.name-in{width:220px;font-size:1.1rem;letter-spacing:3px;}
     <div class="ovt">KICK OFF</div>
   </div>
   <div class="ovs" style="margin-top:-4px">First to 5 goals · 90 seconds</div>
+  <span id="nameBadge">✏ NAME</span>
   <div class="div"></div>
   <div class="tab-row">
     <button class="tab sel" id="tabLocal">🖥 LOCAL</button>
@@ -261,6 +261,7 @@ input.name-in{width:220px;font-size:1.1rem;letter-spacing:3px;}
   <div class="ovt" style="font-size:2.5rem">PAUSED</div>
   <button class="btn pri" id="btnResume">▶ RESUME</button>
   <button class="btn"     id="btnRestart">↺ RESTART</button>
+  <button class="btn"     id="btnBackLobbyPause" style="display:none">🏠 BACK TO LOBBY</button>
   <button class="btn dan" id="btnMainMenu">⌂ MAIN MENU</button>
 </div>
 
@@ -282,6 +283,7 @@ input.name-in{width:220px;font-size:1.1rem;letter-spacing:3px;}
   <div class="ovf" id="goScoreOnline">0 — 0</div>
   <div id="goNamesOnline" style="font-size:.85rem;color:rgba(255,255,255,.35);letter-spacing:2px;margin-top:-4px"></div>
   <div class="div" style="margin:8px 0"></div>
+  <button class="btn pri" id="btnBackLobbyEnd">🏠 BACK TO LOBBY</button>
   <button class="btn dan" id="btnGoMainOnline">⌂ MAIN MENU</button>
 </div>
 
@@ -728,7 +730,8 @@ function endGame(){
     document.getElementById('goScoreOnline').textContent=`${scoreL} — ${scoreR}`;
     document.getElementById('goNamesOnline').textContent=`${hostName} vs ${guestName}`;
     if(mpMode==='host'&&roomRef)set(ref(db,`rooms/${roomCode}/gameOver`),{sL:scoreL,sR:scoreR,ts:Date.now()}).catch(()=>{});
-    show('gameOverOnline');cleanupRoom();
+    show('gameOverOnline');
+    // Don't cleanupRoom here — keep it alive so Back to Lobby works
   }
 }
 
@@ -908,8 +911,42 @@ function launchOnlineGame(role){
   if(role==='host')startTimer();
 }
 
-// ═══════ PAUSE ═══════
-function togglePause(){paused=!paused;paused?show('pauseMenu'):hide('pauseMenu');}
+function backToLobby(){
+  // Stop the game, keep room alive, return to lobby screen
+  gameRunning=false;paused=false;
+  clearInterval(timerInt);clearInterval(syncInterval);syncInterval=null;
+  // Reset scores/timer display
+  scoreL=0;scoreR=0;gameTime=90;goalCD=0;stamina=100;
+  document.getElementById('scL').textContent='0';document.getElementById('scR').textContent='0';
+  document.getElementById('timer').textContent='01:30';
+  document.getElementById('pingBadge').style.display='none';
+  // If host: re-open the room as 'waiting' and re-render lobby
+  if(mpMode==='host'&&roomRef){
+    set(ref(db,`rooms/${roomCode}/status`),'waiting').catch(()=>{});
+    renderLobby(true);
+    document.getElementById('lobbyStatus').textContent='Back in lobby — start again when ready.';
+  }else if(mpMode==='guest'){
+    // Guest just re-shows the lobby read-only; host controls start
+    renderLobby(false);
+    document.getElementById('lobbyStatus').textContent='Waiting for host to start again...';
+    // Re-listen for host starting
+    onValue(ref(db,`rooms/${roomCode}/status`),(snap)=>{
+      if(snap.val()==='playing')launchOnlineGame('guest');
+    });
+  }
+  hideAll();
+  show('roomLobbyScreen');
+}
+  paused=!paused;
+  if(paused){
+    // Show "Back to Lobby" only in online mode
+    document.getElementById('btnBackLobbyPause').style.display=mpMode!=='local'?'block':'none';
+    document.getElementById('btnRestart').style.display=mpMode==='local'?'block':'none';
+    show('pauseMenu');
+  }else{
+    hide('pauseMenu');
+  }
+}
 
 // ═══════ OVERLAYS ═══════
 function show(id){document.getElementById(id).classList.add('on');}
@@ -991,12 +1028,14 @@ document.getElementById('btnLobbyCancel').addEventListener('click',()=>{cleanupR
 document.getElementById('btnResume') .addEventListener('click',()=>togglePause());
 document.getElementById('btnRestart').addEventListener('click',()=>{paused=false;if(mpMode==='local')startLocalGame();else{cleanupRoom();mpMode='local';startLocalGame();}});
 document.getElementById('btnMainMenu').addEventListener('click',()=>{gameRunning=false;paused=false;clearInterval(timerInt);cleanupRoom();mpMode='local';hideAll();show('mainMenu');});
+document.getElementById('btnBackLobbyPause').addEventListener('click',()=>{hide('pauseMenu');backToLobby();});
 
 // Game over — local
 document.getElementById('btnAgainLocal').addEventListener('click',()=>startLocalGame());
 document.getElementById('btnGoMain')    .addEventListener('click',()=>{cleanupRoom();mpMode='local';hideAll();show('mainMenu');});
 // Game over — online (only main menu, no play again)
 document.getElementById('btnGoMainOnline').addEventListener('click',()=>{cleanupRoom();mpMode='local';hideAll();show('mainMenu');});
+document.getElementById('btnBackLobbyEnd').addEventListener('click',()=>{hide('gameOverOnline');backToLobby();});
 
 // Opponent left
 document.getElementById('btnOppBack').addEventListener('click',()=>{cleanupRoom();mpMode='local';hideAll();show('mainMenu');});
