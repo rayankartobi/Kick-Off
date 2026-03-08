@@ -10,6 +10,7 @@
 :root{--y:#f5c800;--g:#28a85a;--r:#e03040;--dark:#080f1e;--white:#eef4ee;--glight:#35d470;--rlight:#ff5060;}
 body{background:var(--dark);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Barlow Condensed',sans-serif;user-select:none;overflow:hidden;}
 
+/* ── HUD ── */
 #hud{display:flex;align-items:center;gap:24px;margin-bottom:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:9px 28px;}
 .ts{text-align:center;}
 .tn{font-size:.7rem;letter-spacing:3px;color:rgba(255,255,255,.45);text-transform:uppercase;}
@@ -20,18 +21,21 @@ body{background:var(--dark);display:flex;flex-direction:column;align-items:cente
 canvas{border-radius:10px;display:block;box-shadow:0 0 60px rgba(40,168,90,.25),0 0 120px rgba(0,0,0,.6);}
 #controls{margin-top:10px;color:rgba(255,255,255,.28);font-size:.75rem;letter-spacing:1px;text-align:center;}
 .k{display:inline-block;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:5px;padding:2px 7px;font-weight:700;color:var(--y);margin:0 2px;}
+#nameBadge{display:inline-block;font-size:.72rem;color:var(--y);letter-spacing:2px;padding:3px 10px;background:rgba(245,200,0,.08);border-radius:20px;cursor:pointer;border:1px solid rgba(245,200,0,.25);transition:all .15s;margin-left:6px;}
+#nameBadge:hover{background:rgba(245,200,0,.16);border-color:rgba(245,200,0,.5);}
 
+/* ── FLASH ── */
 #message{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-family:'Black Ops One',cursive;font-size:3rem;color:var(--y);text-shadow:0 0 40px rgba(245,200,0,.9);pointer-events:none;z-index:150;letter-spacing:8px;white-space:nowrap;}
 #message.show{animation:gp 1.9s forwards;}
 @keyframes gp{0%{transform:translate(-50%,-50%) scale(0);opacity:1;}20%{transform:translate(-50%,-50%) scale(1.15);opacity:1;}75%{transform:translate(-50%,-50%) scale(1.05);opacity:1;}100%{transform:translate(-50%,-50%) scale(1);opacity:0;}}
 
-.ov{position:fixed;inset:0;background:rgba(8,15,30,.95);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:13px;backdrop-filter:blur(6px);}
+/* ── OVERLAYS ── */
+.ov{position:fixed;inset:0;background:rgba(8,15,30,.96);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:13px;backdrop-filter:blur(8px);}
 .ov.on{display:flex;}
-.ovt{font-family:'Black Ops One',cursive;font-size:3.4rem;letter-spacing:8px;color:var(--y);text-shadow:0 0 28px rgba(245,200,0,.5);}
-.ovs{font-size:.9rem;color:rgba(255,255,255,.4);letter-spacing:3px;text-transform:uppercase;}
+.ovt{font-family:'Black Ops One',cursive;font-size:3.2rem;letter-spacing:8px;color:var(--y);text-shadow:0 0 28px rgba(245,200,0,.5);}
+.ovs{font-size:.88rem;color:rgba(255,255,255,.4);letter-spacing:3px;text-transform:uppercase;}
 .ovf{font-family:'Black Ops One',cursive;font-size:5rem;color:var(--white);line-height:1;}
-
-.btn{background:transparent;border:2px solid rgba(255,255,255,.16);color:var(--white);padding:13px 0;font-family:'Black Ops One',cursive;font-size:.95rem;letter-spacing:4px;border-radius:9px;cursor:pointer;transition:background .15s,border-color .15s,transform .1s,box-shadow .15s;width:280px;text-align:center;}
+.btn{background:transparent;border:2px solid rgba(255,255,255,.16);color:var(--white);padding:13px 0;font-family:'Black Ops One',cursive;font-size:.92rem;letter-spacing:4px;border-radius:9px;cursor:pointer;transition:background .15s,border-color .15s,transform .1s,box-shadow .15s;width:280px;text-align:center;}
 .btn:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.38);transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,0,0,.4);}
 .btn:active{transform:translateY(0);}
 .btn.pri{background:var(--y);border-color:var(--y);color:var(--dark);box-shadow:0 4px 20px rgba(245,200,0,.3);}
@@ -39,33 +43,32 @@ canvas{border-radius:10px;display:block;box-shadow:0 0 60px rgba(40,168,90,.25),
 .btn.dan{border-color:rgba(224,48,64,.35);color:var(--r);}
 .btn.dan:hover{border-color:var(--r);background:rgba(224,48,64,.1);}
 .btn.sm{width:auto;padding:10px 20px;font-size:.8rem;letter-spacing:3px;}
-.div{width:210px;height:1px;background:rgba(255,255,255,.09);margin:3px 0;}
+.div{width:220px;height:1px;background:rgba(255,255,255,.09);margin:2px 0;}
 
+/* ── SIZE PICKER ── */
 .size-row{display:flex;gap:8px;justify-content:center;}
 .sz{width:62px;height:62px;border-radius:10px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04);font-family:'Black Ops One',cursive;font-size:1rem;color:rgba(255,255,255,.55);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .15s;gap:2px;}
 .sz span.lbl{font-size:.5rem;letter-spacing:2px;color:rgba(255,255,255,.3);}
 .sz:hover{border-color:rgba(255,255,255,.4);color:var(--white);background:rgba(255,255,255,.07);}
 .sz.sel{border-color:var(--y);color:var(--y);background:rgba(245,200,0,.08);box-shadow:0 0 14px rgba(245,200,0,.2);}
 
+/* ── TABS ── */
 .tab-row{display:flex;border:1px solid rgba(255,255,255,.12);border-radius:10px;overflow:hidden;}
 .tab{padding:10px 26px;font-family:'Black Ops One',cursive;font-size:.8rem;letter-spacing:3px;cursor:pointer;color:rgba(255,255,255,.4);transition:all .15s;background:transparent;border:none;}
 .tab:hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.05);}
 .tab.sel{background:var(--y);color:var(--dark);}
 
-.room-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 22px;text-align:center;width:280px;}
-.room-code{font-family:'Black Ops One',cursive;font-size:2.6rem;letter-spacing:10px;color:var(--y);text-shadow:0 0 20px rgba(245,200,0,.4);}
-.room-label{font-size:.68rem;letter-spacing:3px;color:rgba(255,255,255,.35);margin-bottom:4px;}
-
-/* TEXT INPUTS */
+/* ── TEXT INPUTS ── */
 input.txt{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.14);border-radius:8px;padding:10px 14px;font-family:'Barlow Condensed',sans-serif;font-size:1rem;letter-spacing:2px;color:var(--white);text-align:center;outline:none;transition:border-color .2s;}
 input.txt:focus{border-color:var(--y);}
 input.txt::placeholder{color:rgba(255,255,255,.22);}
-input.code{font-family:'Black Ops One',cursive;font-size:1.5rem;letter-spacing:8px;width:170px;text-transform:uppercase;}
+input.code{font-family:'Black Ops One',cursive;font-size:1.5rem;letter-spacing:8px;width:160px;text-transform:uppercase;}
 input.name-in{width:220px;font-size:1.1rem;letter-spacing:3px;}
 
 .logo-ball{font-size:3.5rem;animation:bb 2.2s ease-in-out infinite;display:inline-block;}
 @keyframes bb{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
 
+/* ── STAMINA / PASS HINT ── */
 #sbar{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:7px;opacity:0;transition:opacity .3s;pointer-events:none;}
 #sbar.on{opacity:1;}
 #slbl{font-size:.65rem;color:rgba(255,255,255,.35);letter-spacing:2px;}
@@ -74,14 +77,61 @@ input.name-in{width:220px;font-size:1.1rem;letter-spacing:3px;}
 #passHint{position:absolute;top:7px;left:50%;transform:translateX(-50%);font-size:.7rem;color:rgba(245,200,0,.8);letter-spacing:2px;pointer-events:none;opacity:0;transition:opacity .2s;font-family:'Barlow Condensed',sans-serif;font-weight:700;background:rgba(0,0,0,.4);padding:3px 10px;border-radius:20px;}
 #passHint.on{opacity:1;}
 
-/* Online config panel */
-.cfg-row{display:flex;align-items:center;gap:10px;font-size:.82rem;color:rgba(255,255,255,.5);letter-spacing:1px;}
-.cfg-row select{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:6px 10px;color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:.85rem;outline:none;cursor:pointer;}
-.cfg-row select:focus{border-color:var(--y);}
+/* ═══════════════════════════════════════════
+   ROOM LOBBY — UNO-STYLE DRAG-DROP SLOTS
+═══════════════════════════════════════════ */
+#roomLobby{width:680px;}
+.lobby-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.lobby-code-box{text-align:center;}
+.lobby-code{font-family:'Black Ops One',cursive;font-size:2.4rem;letter-spacing:10px;color:var(--y);text-shadow:0 0 16px rgba(245,200,0,.5);}
+.lobby-codelbl{font-size:.65rem;letter-spacing:3px;color:rgba(255,255,255,.3);margin-bottom:2px;}
+.lobby-status{font-size:.76rem;letter-spacing:2px;color:rgba(255,255,255,.35);text-align:center;min-height:18px;}
 
-/* Name badge in HUD */
-#nameBadge{font-size:.68rem;color:rgba(255,255,255,.35);letter-spacing:2px;padding:3px 10px;background:rgba(255,255,255,.05);border-radius:20px;cursor:pointer;border:1px solid rgba(255,255,255,.08);transition:all .15s;}
-#nameBadge:hover{color:var(--y);border-color:rgba(245,200,0,.3);}
+/* Teams grid */
+.teams-grid{display:flex;gap:16px;width:100%;}
+.team-col{flex:1;display:flex;flex-direction:column;gap:8px;}
+.team-header{font-family:'Black Ops One',cursive;font-size:.85rem;letter-spacing:4px;text-align:center;padding:6px 0;border-radius:8px;}
+.team-header.green{color:var(--glight);background:rgba(40,168,90,.12);border:1px solid rgba(40,168,90,.2);}
+.team-header.red{color:var(--rlight);background:rgba(224,48,64,.12);border:1px solid rgba(224,48,64,.2);}
+
+/* Slot card */
+.slot{
+  height:52px;border-radius:10px;display:flex;align-items:center;
+  padding:0 14px;gap:10px;cursor:grab;transition:all .18s;position:relative;
+  border:2px solid transparent;
+}
+.slot:active{cursor:grabbing;}
+.slot.player{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14);}
+.slot.player.green-team{background:rgba(40,168,90,.14);border-color:rgba(40,168,90,.3);}
+.slot.player.red-team{background:rgba(224,48,64,.14);border-color:rgba(224,48,64,.3);}
+.slot.bot{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.09);}
+.slot.bot.green-team{background:rgba(40,168,90,.07);border-color:rgba(40,168,90,.15);}
+.slot.bot.red-team{background:rgba(224,48,64,.07);border-color:rgba(224,48,64,.15);}
+.slot.empty{background:rgba(255,255,255,.025);border:2px dashed rgba(255,255,255,.1);cursor:default;}
+.slot.empty.green-team{border-color:rgba(40,168,90,.2);}
+.slot.empty.red-team{border-color:rgba(224,48,64,.2);}
+.slot.drag-over{border-color:var(--y)!important;background:rgba(245,200,0,.08)!important;}
+.slot.dragging{opacity:.4;}
+
+.slot-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.slot-icon.green{background:rgba(40,168,90,.35);}
+.slot-icon.red{background:rgba(224,48,64,.35);}
+.slot-icon.empty-icon{background:rgba(255,255,255,.04);}
+
+.slot-info{flex:1;min-width:0;}
+.slot-name{font-family:'Black Ops One',cursive;font-size:.82rem;letter-spacing:2px;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.slot-name.dim{color:rgba(255,255,255,.3);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.78rem;letter-spacing:2px;}
+.slot-tag{font-size:.58rem;letter-spacing:2px;padding:2px 6px;border-radius:20px;margin-top:2px;display:inline-block;}
+.slot-tag.you{background:rgba(245,200,0,.15);color:var(--y);}
+.slot-tag.bot{background:rgba(255,255,255,.07);color:rgba(255,255,255,.4);}
+.slot-tag.waiting{background:rgba(40,168,90,.1);color:var(--glight);}
+
+/* Add/remove bot button on slot */
+.slot-action{font-size:.75rem;color:rgba(255,255,255,.25);cursor:pointer;padding:4px 6px;border-radius:6px;transition:all .15s;flex-shrink:0;background:none;border:none;}
+.slot-action:hover{color:var(--y);background:rgba(245,200,0,.1);}
+
+/* Lobby buttons row */
+.lobby-btns{display:flex;gap:10px;justify-content:center;margin-top:4px;}
 </style>
 </head>
 <body>
@@ -98,31 +148,43 @@ input.name-in{width:220px;font-size:1.1rem;letter-spacing:3px;}
   <div id="passHint">PASS → <span id="passTarget">teammate</span></div>
 </div>
 <div id="controls">
-  <span class="k">WASD</span> Move &nbsp;·&nbsp;<span class="k">E</span> Trap/Tackle &nbsp;·&nbsp;
-  <span class="k">SPACE</span> Shoot &nbsp;·&nbsp;<span class="k">Q</span> Pass &nbsp;·&nbsp;
-  <span class="k">SHIFT</span> Sprint &nbsp;·&nbsp;<span class="k">ESC</span> Pause &nbsp;·&nbsp;
+  <span class="k">WASD</span> Move &nbsp;·&nbsp;
+  <span class="k">E</span> Trap/Tackle &nbsp;·&nbsp;
+  <span class="k">SPACE</span> Shoot &nbsp;·&nbsp;
+  <span class="k">Q</span> Pass &nbsp;·&nbsp;
+  <span class="k">SHIFT</span> Sprint &nbsp;·&nbsp;
+  <span class="k">ESC</span> Pause &nbsp;·&nbsp;
   <span id="nameBadge">✏ NAME</span>
 </div>
-<div id="message">⚽ GOAL!</div>
+<div id="message"></div>
 
 <!-- ══ NAME SETUP ══ -->
 <div class="ov on" id="nameSetup">
   <div class="logo-ball">⚽</div>
-  <div class="ovt" style="font-size:2.6rem">WHAT'S YOUR NAME?</div>
-  <div class="ovs">This will be shown to opponents</div>
+  <div class="ovt" style="font-size:2.5rem">WHAT'S YOUR NAME?</div>
+  <div class="ovs">Shown to opponents online</div>
   <input class="txt name-in" id="nameInput" maxlength="16" placeholder="Enter your name..." autocomplete="off" spellcheck="false"/>
   <button class="btn pri" id="btnSaveName">LET'S PLAY!</button>
+</div>
+
+<!-- ══ CHANGE NAME ══ -->
+<div class="ov" id="changeNameMenu">
+  <div class="ovt" style="font-size:2.2rem">CHANGE NAME</div>
+  <input class="txt name-in" id="changeNameInput" maxlength="16" placeholder="New name..." autocomplete="off" spellcheck="false"/>
+  <div style="display:flex;gap:10px">
+    <button class="btn pri sm" id="btnConfirmName">SAVE</button>
+    <button class="btn sm" id="btnCancelName">CANCEL</button>
+  </div>
 </div>
 
 <!-- ══ MAIN MENU ══ -->
 <div class="ov" id="mainMenu">
   <div style="display:flex;align-items:center;gap:14px;margin-bottom:-4px">
-    <div class="logo-ball" style="font-size:2.8rem">⚽</div>
+    <div class="logo-ball" style="font-size:2.6rem">⚽</div>
     <div class="ovt">KICK OFF</div>
   </div>
   <div class="ovs" style="margin-top:-4px">First to 5 goals · 90 seconds</div>
   <div class="div"></div>
-
   <div class="tab-row">
     <button class="tab sel" id="tabLocal">🖥 LOCAL</button>
     <button class="tab"     id="tabOnline">🌐 ONLINE</button>
@@ -142,7 +204,6 @@ input.name-in{width:220px;font-size:1.1rem;letter-spacing:3px;}
 
   <!-- ONLINE -->
   <div id="onlinePanel" style="display:none;flex-direction:column;align-items:center;gap:10px">
-    <!-- Team size -->
     <div class="ovs" style="margin-bottom:2px">TEAM SIZE</div>
     <div class="size-row" id="onlineSzRow">
       <div class="sz sel" data-on="1"><span>1v1</span><span class="lbl">SOLO</span></div>
@@ -150,43 +211,48 @@ input.name-in{width:220px;font-size:1.1rem;letter-spacing:3px;}
       <div class="sz"     data-on="3"><span>3v3</span><span class="lbl">SQUAD</span></div>
       <div class="sz"     data-on="5"><span>5v5</span><span class="lbl">FULL</span></div>
     </div>
-    <!-- Bot slots config -->
-    <div class="cfg-row">
-      <span>ALLY BOTS</span>
-      <select id="selAllyBots"><option value="full">Full team</option><option value="none">No bots</option><option value="half">Half bots</option></select>
-      <span>ENEMY BOTS</span>
-      <select id="selEnemyBots"><option value="full">Full team</option><option value="none">No bots</option><option value="half">Half bots</option></select>
-    </div>
-    <div class="div" style="width:280px"></div>
+    <div class="div" style="width:280px;margin:2px 0"></div>
     <button class="btn pri" id="btnHost">🏠 CREATE ROOM</button>
     <div style="display:flex;gap:8px;align-items:center">
       <input class="txt code" id="joinInput" maxlength="4" placeholder="CODE" autocomplete="off" spellcheck="false"/>
       <button class="btn sm pri" id="btnJoin">JOIN</button>
     </div>
     <button class="btn sm" id="btnQuickJoin">⚡ QUICK MATCH</button>
-    <div id="onlineStatus" style="font-size:.76rem;color:rgba(255,255,255,.35);letter-spacing:2px;min-height:18px;text-align:center"></div>
+    <div id="onlineStatus" style="font-size:.76rem;color:rgba(255,255,255,.4);letter-spacing:2px;min-height:18px;text-align:center"></div>
   </div>
 </div>
 
-<!-- ══ WAITING ROOM ══ -->
-<div class="ov" id="waitingRoom">
-  <div style="font-size:2.5rem">🌐</div>
-  <div class="ovt" style="font-size:2rem" id="waitTitle">WAITING FOR OPPONENT</div>
-  <div class="room-box" id="roomCodeBox" style="display:none">
-    <div class="room-label">SHARE THIS CODE</div>
-    <div class="room-code" id="roomCodeDisplay">----</div>
-    <div style="font-size:.6rem;color:rgba(255,255,255,.22);margin-top:4px;letter-spacing:1px">Your friend enters this to join</div>
-  </div>
-  <div class="ovs" id="waitStatus" style="text-align:center"></div>
-  <button class="btn dan" id="btnCancelWait">CANCEL</button>
-</div>
+<!-- ══ ROOM LOBBY ══ -->
+<div class="ov" id="roomLobbyScreen">
+  <div id="roomLobby">
+    <div class="lobby-header">
+      <div>
+        <div class="lobby-codelbl">ROOM CODE</div>
+        <div class="lobby-code" id="lobbyCodeDisplay">----</div>
+      </div>
+      <div style="text-align:right">
+        <div class="ovs" id="lobbyTitle">ROOM LOBBY</div>
+        <div class="lobby-status" id="lobbyStatus">Waiting for players...</div>
+      </div>
+    </div>
 
-<!-- ══ CHANGE NAME ══ -->
-<div class="ov" id="changeNameMenu">
-  <div class="ovt" style="font-size:2.2rem">CHANGE NAME</div>
-  <input class="txt name-in" id="changeNameInput" maxlength="16" placeholder="New name..." autocomplete="off" spellcheck="false"/>
-  <button class="btn pri" id="btnConfirmName">SAVE</button>
-  <button class="btn" id="btnCancelName">CANCEL</button>
+    <div class="teams-grid">
+      <div class="team-col">
+        <div class="team-header green">🟢 GREEN TEAM</div>
+        <div id="greenSlots"></div>
+      </div>
+      <div class="team-col">
+        <div class="team-header red">🔴 RED TEAM</div>
+        <div id="redSlots"></div>
+      </div>
+    </div>
+
+    <div class="lobby-btns" style="margin-top:14px">
+      <button class="btn pri sm" id="btnLobbyStart" style="width:160px">▶ START GAME</button>
+      <button class="btn dan sm" id="btnLobbyCancel">LEAVE</button>
+    </div>
+    <div class="lobby-status" id="lobbyHint" style="margin-top:8px;font-size:.7rem">Drag slots to rearrange · Click empty slots to add/remove bots</div>
+  </div>
 </div>
 
 <!-- ══ PAUSE ══ -->
@@ -198,15 +264,25 @@ input.name-in{width:220px;font-size:1.1rem;letter-spacing:3px;}
   <button class="btn dan" id="btnMainMenu">⌂ MAIN MENU</button>
 </div>
 
-<!-- ══ GAME OVER ══ -->
+<!-- ══ GAME OVER — LOCAL ══ -->
 <div class="ov" id="gameOver">
   <div class="ovt" id="goTitle">YOU WIN!</div>
   <div class="ovs" id="goSubtitle">FINAL SCORE</div>
   <div class="ovf" id="goScore">0 — 0</div>
-  <div id="goNames" style="font-size:.85rem;color:rgba(255,255,255,.35);letter-spacing:2px"></div>
+  <div id="goNames" style="font-size:.85rem;color:rgba(255,255,255,.35);letter-spacing:2px;margin-top:-4px"></div>
   <div class="div" style="margin:8px 0"></div>
-  <button class="btn pri" id="btnAgain">PLAY AGAIN</button>
+  <button class="btn pri" id="btnAgainLocal">PLAY AGAIN</button>
   <button class="btn dan" id="btnGoMain">MAIN MENU</button>
+</div>
+
+<!-- ══ GAME OVER — ONLINE ══ -->
+<div class="ov" id="gameOverOnline">
+  <div class="ovt" id="goTitleOnline">YOU WIN!</div>
+  <div class="ovs">FINAL SCORE</div>
+  <div class="ovf" id="goScoreOnline">0 — 0</div>
+  <div id="goNamesOnline" style="font-size:.85rem;color:rgba(255,255,255,.35);letter-spacing:2px;margin-top:-4px"></div>
+  <div class="div" style="margin:8px 0"></div>
+  <button class="btn dan" id="btnGoMainOnline">⌂ MAIN MENU</button>
 </div>
 
 <!-- ══ OPPONENT LEFT ══ -->
@@ -219,10 +295,10 @@ input.name-in{width:220px;font-size:1.1rem;letter-spacing:3px;}
 
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import{getDatabase,ref,set,get,onValue,off,remove,serverTimestamp,onDisconnect,push,query,orderByChild,equalTo,limitToFirst}
+import{getDatabase,ref,set,get,onValue,remove,serverTimestamp,onDisconnect}
   from'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
-// ═══════════ FIREBASE ═══════════
+// ═══════ FIREBASE ═══════
 const app=initializeApp({
   apiKey:"AIzaSyCdrNaapo6z4qcIItmcXwxPBP1oXL4n1L8",
   authDomain:"kick-off-25b6a.firebaseapp.com",
@@ -234,56 +310,49 @@ const app=initializeApp({
 });
 const db=getDatabase(app);
 
-// ═══════════ CANVAS ═══════════
+// ═══════ CANVAS ═══════
 const canvas=document.getElementById('canvas');
 const ctx=canvas.getContext('2d');
 const W=canvas.width,H=canvas.height;
 
-// ═══════════ CONSTANTS ═══════════
-const PAD=28,GOAL_H=110,GOAL_D=24;
-const GT=H/2-GOAL_H/2;
-const PR=13,BR=8;
-const KICK_PWR=17,PASS_PWR=9;
+// ═══════ CONSTANTS ═══════
+const PAD=28,GOAL_H=110,GOAL_D=24,GT=H/2-GOAL_H/2;
+const PR=13,BR=8,KICK_PWR=17,PASS_PWR=9;
 const TRAP_D=PR+BR+9,CARRY_D=PR+BR-2,BFRIC=0.905,TACKLE_D=PR*2+8;
 const SYNC_HZ=20;
 
-// ═══════════ NAME SYSTEM ═══════════
+// ═══════ NAME ═══════
 let myName=localStorage.getItem('kickoff_name')||'';
-function saveName(n){myName=n.trim()||'Player';localStorage.setItem('kickoff_name',myName);updateNameBadge();}
-function updateNameBadge(){document.getElementById('nameBadge').textContent='✏ '+myName;}
+function saveName(n){myName=n.trim()||'Player';localStorage.setItem('kickoff_name',myName);document.getElementById('nameBadge').textContent='✏ '+myName;}
 
-// ═══════════ STATE ═══════════
+// ═══════ STATE ═══════
 let scoreL=0,scoreR=0,gameTime=90;
-let timerInt=null,gameRunning=false,paused=false,goalCD=0;
-let stamina=100,teamSize=1,onlineTeamSize=1;
-let allyBotMode='full',enemyBotMode='full';
-
-// MP
-let mpMode='local';
+let timerInt=null,gameRunning=false,paused=false,goalCD=0,stamina=100;
+let teamSize=1,onlineTeamSize=1;
+let mpMode='local'; // 'local'|'host'|'guest'
 let roomCode=null,roomRef=null,inputRef=null;
 let remoteState=null,pingStart=0,pingMs=0,syncInterval=null;
-let opponentName='Opponent';
 let hostName='',guestName='';
-// Names in HUD
-let leftName='GREEN',rightName='RED';
 
-// ═══════════ INPUT — fixed to not block typing in text fields ═══════════
+// ═══════ LOBBY STATE ═══════
+// Each slot: {type:'human'|'bot'|'empty', name:str, team:'green'|'red', isMe:bool}
+let lobbySlots=[];
+let lobbySize=1;
+let dragSrc=null; // index being dragged
+
+// ═══════ INPUT ═══════
 const keys={},just={};
 document.addEventListener('keydown',e=>{
-  const tag=document.activeElement.tagName;
-  if(tag==='INPUT'||tag==='TEXTAREA')return; // allow typing in inputs
+  if(document.activeElement.tagName==='INPUT')return;
   if(!keys[e.code])just[e.code]=true;
   keys[e.code]=true;
-  if(e.code==='Escape'){
-    if(gameRunning)togglePause();
-    return;
-  }
+  if(e.code==='Escape'){if(gameRunning)togglePause();return;}
   e.preventDefault();
 });
 document.addEventListener('keyup',e=>{keys[e.code]=false;});
 function eat(c){const v=just[c];delete just[c];return v;}
 
-// ═══════════ FORMATIONS ═══════════
+// ═══════ FORMATIONS ═══════
 const FORMATIONS={
   1:[{x:.35,y:.5}],
   2:[{x:.25,y:.38},{x:.25,y:.62}],
@@ -291,72 +360,203 @@ const FORMATIONS={
   5:[{x:.12,y:.5},{x:.25,y:.28},{x:.25,y:.72},{x:.4,y:.35},{x:.4,y:.65}]
 };
 
-// ═══════════ ENTITIES ═══════════
+// ═══════ ENTITIES ═══════
 let leftTeam=[],rightTeam=[],ball;
 
 function makePlayer(x,y,team,isHuman,isRemote=false){
-  return{x,y,vx:0,vy:0,r:PR,team,isHuman,isRemote,
-    carrying:false,kicking:0,facing:{x:team==='left'?1:-1,y:0},
-    speed:isHuman?3.8:(team==='left'?3.2:2.9),sprintSpd:5.8,
-    bt:0,role:'attack',homeX:x,homeY:y,
-    passCD:0,tackleCD:0,wanderX:0,wanderY:0,supportX:0,supportY:0,
-    color:team==='left'?'#28a85a':'#e03040',hlColor:team==='left'?'#35d470':'#ff5060'};
+  return{x,y,r:PR,team,isHuman,isRemote,carrying:false,kicking:0,
+    facing:{x:team==='left'?1:-1,y:0},speed:isHuman?3.8:(team==='left'?3.2:2.9),sprintSpd:5.8,
+    bt:0,role:'attack',homeX:x,homeY:y,passCD:0,tackleCD:0,wanderX:0,wanderY:0,supportX:0,supportY:0,
+    color:team==='left'?'#28a85a':'#e03040',hlColor:team==='left'?'#35d470':'#ff5060',disabled:false};
 }
 function makeBall(){return{x:W/2,y:H/2,vx:0,vy:0,r:BR,owner:null};}
 
-function spawnTeams(sz){
-  const n=sz||teamSize;
+function spawnFromLobby(){
+  // Build teams from lobbySlots
   leftTeam=[];rightTeam=[];
-  const form=FORMATIONS[n];
+  const form=FORMATIONS[lobbySize];
+  const greens=lobbySlots.filter(s=>s.team==='green');
+  const reds=lobbySlots.filter(s=>s.team==='red');
   form.forEach((pos,i)=>{
     const lx=PAD+GOAL_D+(pos.x*(W/2-PAD-GOAL_D)),ly=pos.y*H;
     const rx=W-(PAD+GOAL_D)-(pos.x*(W/2-PAD-GOAL_D)),ry=pos.y*H;
-    // Left team: [0]=human, rest=ally bots (unless disabled)
-    const lHuman=(i===0);
-    // Right team: [0]=remote human (online) or cpu bot, rest=cpu bots
-    const rRemote=(i===0&&mpMode!=='local');
-    leftTeam.push(makePlayer(lx,ly,'left',lHuman,false));
-    rightTeam.push(makePlayer(rx,ry,'right',rRemote,rRemote));
+    const gs=greens[i]||{type:'empty'};
+    const rs=reds[i]||{type:'empty'};
+    const lHuman=gs.type==='human';
+    const lRemote=gs.type==='human'&&gs.isMe===false; // host perspective: remote means not me
+    const rHuman=rs.type==='human';
+    const rRemote=rs.type==='human'&&rs.isMe===false;
+    const lDisabled=gs.type==='empty';
+    const rDisabled=rs.type==='empty';
+    const lp=makePlayer(lx,ly,'left',lHuman,lRemote);lp.disabled=lDisabled;leftTeam.push(lp);
+    const rp=makePlayer(rx,ry,'right',rHuman,rRemote);rp.disabled=rDisabled;rightTeam.push(rp);
   });
-  // Apply bot mode settings for online
-  if(mpMode!=='local'){
-    applyBotSlots();
-  }
   leftTeam.forEach(p=>{p.homeX=p.x;p.homeY=p.y;});
   rightTeam.forEach(p=>{p.homeX=p.x;p.homeY=p.y;});
   ball=makeBall();
 }
 
-function applyBotSlots(){
-  const n=leftTeam.length;
-  // Ally bots (left[1+])
-  if(allyBotMode==='none'){
-    leftTeam.slice(1).forEach(p=>{p.isHuman=false;p.disabled=true;});
-  } else if(allyBotMode==='half'){
-    leftTeam.slice(1).forEach((p,i)=>{p.disabled=(i%2===1);});
-  }
-  // Enemy bots (right[1+])
-  if(enemyBotMode==='none'){
-    rightTeam.slice(1).forEach(p=>{p.disabled=true;});
-  } else if(enemyBotMode==='half'){
-    rightTeam.slice(1).forEach((p,i)=>{p.disabled=(i%2===1);});
-  }
+function spawnTeams(sz){
+  teamSize=sz||teamSize;
+  leftTeam=[];rightTeam=[];
+  const form=FORMATIONS[teamSize];
+  form.forEach((pos,i)=>{
+    const lx=PAD+GOAL_D+(pos.x*(W/2-PAD-GOAL_D)),ly=pos.y*H;
+    const rx=W-(PAD+GOAL_D)-(pos.x*(W/2-PAD-GOAL_D)),ry=pos.y*H;
+    leftTeam.push(makePlayer(lx,ly,'left',i===0));
+    rightTeam.push(makePlayer(rx,ry,'right',i===0&&mpMode!=='local',i===0&&mpMode!=='local'));
+  });
+  leftTeam.forEach(p=>{p.homeX=p.x;p.homeY=p.y;});
+  rightTeam.forEach(p=>{p.homeX=p.x;p.homeY=p.y;});
+  ball=makeBall();
 }
+
 function allPlayers(){return[...leftTeam,...rightTeam].filter(p=>!p.disabled);}
 
-// ═══════════ DRAW ═══════════
+// ═══════════════════════════════════════════
+//  LOBBY SYSTEM
+// ═══════════════════════════════════════════
+function initLobbySlots(n){
+  lobbySize=n;
+  lobbySlots=[];
+  // Green team: slot 0 = host (me), rest = empty
+  for(let i=0;i<n;i++){
+    lobbySlots.push({team:'green',type:i===0?'human':'empty',name:i===0?myName:'',isMe:i===0});
+  }
+  // Red team: all empty
+  for(let i=0;i<n;i++){
+    lobbySlots.push({team:'red',type:'empty',name:'',isMe:false});
+  }
+}
+
+function guestJoinLobby(name){
+  // Find first empty slot and put guest there
+  const idx=lobbySlots.findIndex(s=>s.type==='empty');
+  if(idx!==-1){lobbySlots[idx]={team:lobbySlots[idx].team,type:'human',name,isMe:false};}
+}
+
+function renderLobby(isHost){
+  const gSlots=lobbySlots.filter(s=>s.team==='green');
+  const rSlots=lobbySlots.filter(s=>s.team==='red');
+  renderSlotColumn('greenSlots',gSlots,isHost,'green');
+  renderSlotColumn('redSlots',rSlots,isHost,'red');
+  // Check if game is startable
+  const hasGuest=lobbySlots.some(s=>s.type==='human'&&!s.isMe);
+  const startBtn=document.getElementById('btnLobbyStart');
+  if(isHost){
+    startBtn.style.display='inline-block';
+    startBtn.disabled=!hasGuest;
+    startBtn.style.opacity=hasGuest?'1':'0.4';
+    document.getElementById('lobbyStatus').textContent=hasGuest?'Opponent joined! Ready to start.':'Waiting for opponent to join...';
+  }else{
+    startBtn.style.display='none';
+    document.getElementById('lobbyStatus').textContent='Waiting for host to start...';
+  }
+}
+
+function renderSlotColumn(containerId,slots,isHost,teamColor){
+  const container=document.getElementById(containerId);
+  container.innerHTML='';
+  const globalOffset=teamColor==='green'?0:lobbySize;
+  slots.forEach((slot,localIdx)=>{
+    const globalIdx=globalOffset+localIdx;
+    const el=document.createElement('div');
+    el.className=`slot ${slot.type} ${teamColor}-team`;
+    el.dataset.idx=globalIdx;
+
+    let iconHtml='',nameHtml='',tagHtml='',actionHtml='';
+
+    if(slot.type==='human'){
+      iconHtml=`<div class="slot-icon ${teamColor}">👤</div>`;
+      nameHtml=`<span class="slot-name">${slot.name||'Player'}</span>`;
+      tagHtml=slot.isMe?`<span class="slot-tag you">YOU</span>`:
+              (mpMode==='host'?`<span class="slot-tag waiting">ONLINE</span>`:
+               `<span class="slot-tag waiting">OPPONENT</span>`);
+    }else if(slot.type==='bot'){
+      iconHtml=`<div class="slot-icon ${teamColor}">🤖</div>`;
+      nameHtml=`<span class="slot-name dim">BOT</span>`;
+      tagHtml=`<span class="slot-tag bot">AI</span>`;
+      if(isHost)actionHtml=`<button class="slot-action" data-action="remove" data-idx="${globalIdx}" title="Remove bot">✕</button>`;
+    }else{
+      iconHtml=`<div class="slot-icon empty-icon" style="color:rgba(255,255,255,.15);font-size:1.3rem">+</div>`;
+      nameHtml=`<span class="slot-name dim">Empty Slot</span>`;
+      if(isHost)actionHtml=`<button class="slot-action" data-action="add" data-idx="${globalIdx}" title="Add bot">+ Bot</button>`;
+    }
+
+    el.innerHTML=`${iconHtml}<div class="slot-info">${nameHtml}${tagHtml}</div>${actionHtml}`;
+
+    // Draggable — host only, only for bot/human slots (not empty)
+    if(isHost&&slot.type!=='empty'){
+      el.draggable=true;
+      el.addEventListener('dragstart',e=>{
+        dragSrc=globalIdx;el.classList.add('dragging');
+        e.dataTransfer.effectAllowed='move';
+      });
+      el.addEventListener('dragend',()=>{el.classList.remove('dragging');dragSrc=null;renderLobby(true);});
+    }
+
+    // Drop target — all slots
+    if(isHost){
+      el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('drag-over');});
+      el.addEventListener('dragleave',()=>el.classList.remove('drag-over'));
+      el.addEventListener('drop',e=>{
+        e.preventDefault();el.classList.remove('drag-over');
+        if(dragSrc===null||dragSrc===globalIdx)return;
+        // Swap
+        const tmp={...lobbySlots[dragSrc]};
+        lobbySlots[dragSrc]={...lobbySlots[globalIdx],team:lobbySlots[dragSrc].team};
+        lobbySlots[globalIdx]={...tmp,team:lobbySlots[globalIdx].team};
+        dragSrc=null;
+        renderLobby(true);
+        pushLobbyToFirebase();
+      });
+    }
+
+    // Action buttons
+    el.querySelectorAll('[data-action]').forEach(btn=>{
+      btn.addEventListener('click',e=>{
+        e.stopPropagation();
+        const idx=parseInt(btn.dataset.idx);
+        if(btn.dataset.action==='add'){
+          lobbySlots[idx].type='bot';lobbySlots[idx].name='Bot';
+        }else if(btn.dataset.action==='remove'){
+          lobbySlots[idx].type='empty';lobbySlots[idx].name='';
+        }
+        renderLobby(true);
+        pushLobbyToFirebase();
+      });
+    });
+
+    container.appendChild(el);
+  });
+}
+
+function pushLobbyToFirebase(){
+  if(!roomCode||mpMode!=='host')return;
+  const slim=lobbySlots.map(s=>({team:s.team,type:s.type,name:s.name||'',isMe:false}));
+  set(ref(db,`rooms/${roomCode}/lobby`),slim).catch(()=>{});
+}
+
+function getLobbyConfig(){
+  // Returns {greenTeam:[{type,name}], redTeam:[{type,name}]}
+  return{
+    greens:lobbySlots.filter(s=>s.team==='green'),
+    reds:lobbySlots.filter(s=>s.team==='red')
+  };
+}
+
+// ═══════════════════════════════════════════
+//  DRAW
+// ═══════════════════════════════════════════
 function drawField(){
   for(let i=0;i<10;i++){ctx.fillStyle=i%2===0?'#2a8548':'#277d44';ctx.fillRect(i*W/10,0,W/10,H);}
-  ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=2;
-  ctx.strokeRect(PAD,PAD,W-PAD*2,H-PAD*2);
+  ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=2;ctx.strokeRect(PAD,PAD,W-PAD*2,H-PAD*2);
   ctx.beginPath();ctx.moveTo(W/2,PAD);ctx.lineTo(W/2,H-PAD);ctx.stroke();
   ctx.beginPath();ctx.arc(W/2,H/2,55,0,Math.PI*2);ctx.stroke();
   ctx.fillStyle='rgba(255,255,255,.5)';ctx.beginPath();ctx.arc(W/2,H/2,3,0,Math.PI*2);ctx.fill();
   ctx.strokeRect(PAD,H/2-88,88,176);ctx.strokeRect(W-PAD-88,H/2-88,88,176);
-  ctx.fillStyle='rgba(0,0,0,.32)';
-  ctx.fillRect(0,GT,GOAL_D,GOAL_H);ctx.fillRect(W-GOAL_D,GT,GOAL_D,GOAL_H);
-  ctx.strokeStyle='#fff';ctx.lineWidth=3;
-  ctx.strokeRect(0,GT,GOAL_D,GOAL_H);ctx.strokeRect(W-GOAL_D,GT,GOAL_D,GOAL_H);
+  ctx.fillStyle='rgba(0,0,0,.32)';ctx.fillRect(0,GT,GOAL_D,GOAL_H);ctx.fillRect(W-GOAL_D,GT,GOAL_D,GOAL_H);
+  ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.strokeRect(0,GT,GOAL_D,GOAL_H);ctx.strokeRect(W-GOAL_D,GT,GOAL_D,GOAL_H);
   ctx.strokeStyle='rgba(255,255,255,.16)';ctx.lineWidth=1;
   for(let i=1;i<4;i++){const ny=GT+(GOAL_H/4)*i;ctx.beginPath();ctx.moveTo(0,ny);ctx.lineTo(GOAL_D,ny);ctx.stroke();ctx.beginPath();ctx.moveTo(W,ny);ctx.lineTo(W-GOAL_D,ny);ctx.stroke();}
 }
@@ -367,15 +567,11 @@ function drawPlayer(p,label,isControlled){
   if(isControlled){ctx.shadowColor=p.hlColor;ctx.shadowBlur=14;}
   const g=ctx.createRadialGradient(p.x-4,p.y-4,2,p.x,p.y,p.r);
   g.addColorStop(0,lighten(p.color,55));g.addColorStop(1,p.color);
-  ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
-  ctx.shadowBlur=0;
-  if(p.isRemote||p.isHuman&&mpMode!=='local'&&p.team==='right'){
-    ctx.fillStyle='rgba(255,200,0,.9)';ctx.font='9px serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText('★',p.x,p.y-p.r-1);
-  }
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+  if(p.isRemote){ctx.fillStyle='rgba(255,200,0,.9)';ctx.font='9px serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText('★',p.x,p.y-p.r-1);}
   if(p.carrying){ctx.strokeStyle=p.team==='left'?'rgba(245,200,0,.85)':'rgba(255,255,255,.6)';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(p.x,p.y,p.r+4,0,Math.PI*2);ctx.stroke();}
   if(p.kicking>0){ctx.strokeStyle=`rgba(255,255,255,${p.kicking/8})`;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(p.x,p.y,p.r+7,0,Math.PI*2);ctx.stroke();}
-  ctx.fillStyle='rgba(255,255,255,.95)';ctx.font=`bold 8px 'Barlow Condensed',sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText(label,p.x,p.y);
+  ctx.fillStyle='rgba(255,255,255,.95)';ctx.font=`bold 8px 'Barlow Condensed',sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,p.x,p.y);
 }
 
 function drawBall(b){
@@ -388,74 +584,51 @@ function drawBall(b){
 }
 function lighten(h,a){const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return`rgb(${Math.min(255,r+a)},${Math.min(255,g+a)},${Math.min(255,b+a)})`;}
 
-// ═══════════ HUMAN UPDATE ═══════════
+// ═══════ HUMAN UPDATE ═══════
 function updateHuman(p){
   const spr=(keys['ShiftLeft']||keys['ShiftRight'])&&stamina>0;
   const spd=spr?p.sprintSpd:p.speed;
-  if(spr)stamina=Math.max(0,stamina-1.1); else stamina=Math.min(100,stamina+0.55);
+  if(spr)stamina=Math.max(0,stamina-1.1);else stamina=Math.min(100,stamina+0.55);
   document.getElementById('sfill').style.width=stamina+'%';
   document.getElementById('sfill').style.background=stamina<25?'#e03040':'#f5c800';
   document.getElementById('sbar').classList.toggle('on',spr||stamina<75);
   let dx=0,dy=0;
-  if(keys['KeyA']||keys['ArrowLeft'])dx=-1;
-  if(keys['KeyD']||keys['ArrowRight'])dx=1;
-  if(keys['KeyW']||keys['ArrowUp'])dy=-1;
-  if(keys['KeyS']||keys['ArrowDown'])dy=1;
-  if(dx&&dy){dx*=.707;dy*=.707;}
-  if(dx||dy){p.facing.x=dx;p.facing.y=dy;}
-  p.x=clamp(p.x+dx*spd,PAD+PR,W-PAD-PR);
-  p.y=clamp(p.y+dy*spd,PAD+PR,H-PAD-PR);
+  if(keys['KeyA']||keys['ArrowLeft'])dx=-1;if(keys['KeyD']||keys['ArrowRight'])dx=1;
+  if(keys['KeyW']||keys['ArrowUp'])dy=-1;if(keys['KeyS']||keys['ArrowDown'])dy=1;
+  if(dx&&dy){dx*=.707;dy*=.707;}if(dx||dy){p.facing.x=dx;p.facing.y=dy;}
+  p.x=clamp(p.x+dx*spd,PAD+PR,W-PAD-PR);p.y=clamp(p.y+dy*spd,PAD+PR,H-PAD-PR);
   const db=distE(p,ball);
   const enemies=p.team==='left'?rightTeam:leftTeam;
   if(!p.carrying&&ball.owner===null&&db<TRAP_D&&Math.hypot(ball.vx,ball.vy)<2)trap(p);
-  if(eat('KeyE')){
-    const ec=enemies.find(e=>e.carrying&&!e.disabled&&distE(p,e)<TACKLE_D);
-    if(ec){loose(ec);trap(p);p.kicking=10;}
-    else if(!p.carrying&&ball.owner!==p.team&&db<TRAP_D+10)trap(p);
-  }
-  if(p.carrying){
-    enemies.forEach(e=>{if(!e.disabled&&e.tackleCD===0&&distE(p,e)<PR*2+3&&Math.random()<0.018){loose(p);ball.vx=(Math.random()-.5)*5;ball.vy=(Math.random()-.5)*5;e.tackleCD=70;}});
-  }
+  if(eat('KeyE')){const ec=enemies.find(e=>e.carrying&&!e.disabled&&distE(p,e)<TACKLE_D);if(ec){loose(ec);trap(p);p.kicking=10;}else if(!p.carrying&&ball.owner!==p.team&&db<TRAP_D+10)trap(p);}
+  if(p.carrying){enemies.forEach(e=>{if(!e.disabled&&e.tackleCD===0&&distE(p,e)<PR*2+3&&Math.random()<0.018){loose(p);ball.vx=(Math.random()-.5)*5;ball.vy=(Math.random()-.5)*5;e.tackleCD=70;}});}
   if(p.carrying)attachBall(p);
-  if(eat('Space')){
-    if(p.carrying)shoot(p,p.facing.x,p.facing.y,KICK_PWR);
-    else if(db<TRAP_D+8&&ball.owner!==p.team){const ang=Math.atan2(ball.y-p.y,ball.x-p.x);kickBall(p,Math.cos(ang),Math.sin(ang),KICK_PWR);}
-  }
+  if(eat('Space')){if(p.carrying)shoot(p,p.facing.x,p.facing.y,KICK_PWR);else if(db<TRAP_D+8&&ball.owner!==p.team){const ang=Math.atan2(ball.y-p.y,ball.x-p.x);kickBall(p,Math.cos(ang),Math.sin(ang),KICK_PWR);}}
   const allies=p.team==='left'?leftTeam:rightTeam;
-  if(eat('KeyQ')&&allies.length>1){
+  if(eat('KeyQ')&&allies.filter(t=>!t.disabled).length>1){
     const t=nearestTeammate(p,allies);
     if(t&&p.carrying){passTo(p,t);showPassHint(t);}
-    else if(t&&distE(p,ball)<TRAP_D+8&&ball.owner!==enemies[0]?.team){trap(p);passTo(p,t);showPassHint(t);}
+    else if(t&&distE(p,ball)<TRAP_D+8&&ball.owner!==p.team){trap(p);passTo(p,t);showPassHint(t);}
   }
   if(p.kicking>0)p.kicking--;
-  // Guest publishes position
-  if(mpMode==='guest'&&inputRef){
-    set(inputRef,{x:p.x,y:p.y,fx:p.facing.x,fy:p.facing.y,carrying:p.carrying,kicking:p.kicking,ts:Date.now()}).catch(()=>{});
-  }
+  if(mpMode==='guest'&&inputRef){set(inputRef,{x:p.x,y:p.y,fx:p.facing.x,fy:p.facing.y,carrying:p.carrying,kicking:p.kicking,ts:Date.now()}).catch(()=>{});}
 }
 
-function applyRemoteInput(p,inp){
-  if(!inp)return;
-  p.x+=(inp.x-p.x)*0.4;p.y+=(inp.y-p.y)*0.4;
-  p.facing.x=inp.fx||p.facing.x;p.facing.y=inp.fy||p.facing.y;
-  p.carrying=inp.carrying||false;p.kicking=inp.kicking||0;
-  if(p.carrying)attachBall(p);
-}
+function applyRemoteInput(p,inp){if(!inp)return;p.x+=(inp.x-p.x)*0.4;p.y+=(inp.y-p.y)*0.4;p.facing.x=inp.fx||p.facing.x;p.facing.y=inp.fy||p.facing.y;p.carrying=inp.carrying||false;p.kicking=inp.kicking||0;if(p.carrying)attachBall(p);}
 
-// ═══════════ ALLY BOT ═══════════
+// ═══════ ALLY BOT ═══════
 function updateAllyBot(p){
   if(p.disabled)return;
-  if(p.passCD>0)p.passCD--;if(p.tackleCD>0)p.tackleCD--;
-  p.bt--;
+  if(p.passCD>0)p.passCD--;if(p.tackleCD>0)p.tackleCD--;p.bt--;
   if(p.bt<=0){p.bt=25+Math.random()*25;decideAllyRole(p);p.wanderX=p.homeX+60+Math.random()*60;p.wanderY=p.homeY+(Math.random()-.5)*80;p.supportX=p.homeX+80;p.supportY=p.homeY+(Math.random()-.5)*60;}
   const db=distE(p,ball);
   if(p.carrying){
     const dg=Math.hypot(ball.x-(W-PAD-GOAL_D),ball.y-H/2);
     if(dg<200){const gy=H/2+(Math.random()-.5)*GOAL_H*.5,ang=Math.atan2(gy-ball.y,(W-PAD-10)-ball.x);shoot(p,Math.cos(ang),Math.sin(ang),10+Math.random()*3);}
-    else if(p.passCD===0&&Math.random()<0.015&&leftTeam.length>1){const t=bestPassTarget(p,leftTeam,rightTeam);if(t)passTo(p,t);}
+    else if(p.passCD===0&&Math.random()<0.015&&leftTeam.filter(t=>!t.disabled).length>1){const t=bestPassTarget(p,leftTeam,rightTeam);if(t)passTo(p,t);}
     else{moveTo(p,W-PAD-GOAL_D-30,H/2+(Math.random()-.5)*60);attachBall(p);}
   }else{
-    const alwaysChase=leftTeam.length===1||ball.owner===null;
+    const alwaysChase=leftTeam.filter(t=>!t.disabled).length===1||ball.owner===null;
     if(alwaysChase||(p.role==='attack'&&db<300))moveTo(p,ball.x,ball.y);
     else if(p.role==='support')moveTo(p,p.supportX||p.homeX+80,p.supportY||p.homeY);
     else moveTo(p,p.homeX,p.homeY);
@@ -465,20 +638,18 @@ function updateAllyBot(p){
   if(p.carrying){rightTeam.forEach(e=>{if(!e.disabled&&e.tackleCD===0&&distE(p,e)<PR*2+3&&Math.random()<0.018){loose(p);ball.vx=(Math.random()-.5)*5;ball.vy=(Math.random()-.5)*5;e.tackleCD=70;}});}
   if(p.kicking>0)p.kicking--;
 }
-
 function decideAllyRole(p){const idx=leftTeam.indexOf(p),th=leftTeam.some(x=>x.carrying);if(th&&!p.carrying)p.role='support';else if(distE(p,ball)<180)p.role='attack';else p.role=idx<leftTeam.length/2?'defend':'support';}
 
-// ═══════════ CPU BOT ═══════════
+// ═══════ CPU BOT ═══════
 function updateCPUBot(p){
   if(p.disabled)return;
-  if(p.passCD>0)p.passCD--;if(p.tackleCD>0)p.tackleCD--;
-  p.bt--;
+  if(p.passCD>0)p.passCD--;if(p.tackleCD>0)p.tackleCD--;p.bt--;
   if(p.bt<=0){p.bt=22+Math.random()*22;decideCPURole(p);p.wanderX=p.homeX-60-Math.random()*60;p.wanderY=p.homeY+(Math.random()-.5)*80;p.supportX=p.homeX-80;p.supportY=p.homeY+(Math.random()-.5)*60;}
   const db=distE(p,ball);
   if(p.carrying){
     const dg=Math.hypot(ball.x-(PAD+GOAL_D),ball.y-H/2);
     if(dg<200){const gy=H/2+(Math.random()-.5)*GOAL_H*.5,ang=Math.atan2(gy-ball.y,(PAD+10)-ball.x);shoot(p,Math.cos(ang),Math.sin(ang),10+Math.random()*3);}
-    else if(p.passCD===0&&Math.random()<0.015&&rightTeam.length>1){const t=bestPassTarget(p,rightTeam,leftTeam);if(t)passTo(p,t);}
+    else if(p.passCD===0&&Math.random()<0.015&&rightTeam.filter(t=>!t.disabled).length>1){const t=bestPassTarget(p,rightTeam,leftTeam);if(t)passTo(p,t);}
     else{moveTo(p,p.wanderX||PAD+GOAL_D+20,p.wanderY||H/2);attachBall(p);}
   }else{
     if(p.role==='attack'&&db<300)moveTo(p,ball.x,ball.y);
@@ -492,29 +663,25 @@ function updateCPUBot(p){
 }
 function decideCPURole(p){const idx=rightTeam.indexOf(p),th=rightTeam.some(x=>x.carrying);if(th&&!p.carrying)p.role='support';else if(distE(p,ball)<180)p.role='attack';else p.role=idx<rightTeam.length/2?'defend':'support';}
 
-// ═══════════ BALL ═══════════
+// ═══════ BALL ═══════
 function updateBall(){
   if(ball.owner)return;
   ball.x+=ball.vx;ball.y+=ball.vy;ball.vx*=BFRIC;ball.vy*=BFRIC;
   const gy=ball.y>GT&&ball.y<GT+GOAL_H;
-  if(ball.y-BR<PAD){ball.y=PAD+BR;ball.vy*=-.7;}
-  if(ball.y+BR>H-PAD){ball.y=H-PAD-BR;ball.vy*=-.7;}
-  if(ball.x-BR<PAD&&!gy){ball.x=PAD+BR;ball.vx*=-.7;}
-  if(ball.x+BR>W-PAD&&!gy){ball.x=W-PAD-BR;ball.vx*=-.7;}
+  if(ball.y-BR<PAD){ball.y=PAD+BR;ball.vy*=-.7;}if(ball.y+BR>H-PAD){ball.y=H-PAD-BR;ball.vy*=-.7;}
+  if(ball.x-BR<PAD&&!gy){ball.x=PAD+BR;ball.vx*=-.7;}if(ball.x+BR>W-PAD&&!gy){ball.x=W-PAD-BR;ball.vx*=-.7;}
   if(goalCD===0){
-    if(ball.x-BR<GOAL_D&&gy){scoreR++;flashGoal(mpMode==='guest'?'THEY SCORE!':'CPU SCORES!','right');return;}
+    if(ball.x-BR<GOAL_D&&gy){scoreR++;flashGoal(mpMode==='guest'?'THEY SCORE!':'⚽ THEY SCORE!','right');return;}
     if(ball.x+BR>W-GOAL_D&&gy){scoreL++;flashGoal('⚽ GOAL!','left');return;}
   }
-  if(ball.x-BR<0){ball.x=BR;ball.vx*=-.5;}
-  if(ball.x+BR>W){ball.x=W-BR;ball.vx*=-.5;}
+  if(ball.x-BR<0){ball.x=BR;ball.vx*=-.5;}if(ball.x+BR>W){ball.x=W-BR;ball.vx*=-.5;}
   allPlayers().forEach(p=>{if(!p.carrying)pushBall(p,ball,0.55);});
-  const all=allPlayers();
-  for(let i=0;i<all.length;i++)for(let j=i+1;j<all.length;j++)resolveEnt(all[i],all[j]);
+  const all=allPlayers();for(let i=0;i<all.length;i++)for(let j=i+1;j<all.length;j++)resolveEnt(all[i],all[j]);
 }
 function pushBall(e,b,rest){const dx=b.x-e.x,dy=b.y-e.y,d=Math.hypot(dx,dy),min=e.r+b.r;if(d<min&&d>0){const nx=dx/d,ny=dy/d,ov=min-d;b.x+=nx*ov;b.y+=ny*ov;const dot=b.vx*nx+b.vy*ny;if(dot<0){b.vx-=(1+rest)*dot*nx;b.vy-=(1+rest)*dot*ny;}}}
 function resolveEnt(a,b){const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),min=a.r+b.r;if(d<min&&d>0){const nx=dx/d,ny=dy/d,ov=(min-d)/2;a.x-=nx*ov;a.y-=ny*ov;b.x+=nx*ov;b.y+=ny*ov;a.x=clamp(a.x,PAD+PR,W-PAD-PR);a.y=clamp(a.y,PAD+PR,H-PAD-PR);b.x=clamp(b.x,PAD+PR,W-PAD-PR);b.y=clamp(b.y,PAD+PR,H-PAD-PR);}}
 
-// ═══════════ HELPERS ═══════════
+// ═══════ PHYSICS HELPERS ═══════
 function trap(p){allPlayers().forEach(a=>{a.carrying=false;});p.carrying=true;ball.owner=p.team;ball.vx=0;ball.vy=0;attachBall(p);}
 function loose(p){p.carrying=false;ball.owner=null;}
 function attachBall(p){const fx=p.facing.x||1,fy=p.facing.y||0,l=Math.hypot(fx,fy)||1;ball.x=p.x+(fx/l)*CARRY_D;ball.y=p.y+(fy/l)*CARRY_D;ball.vx=0;ball.vy=0;}
@@ -522,7 +689,7 @@ function shoot(p,dx,dy,pwr){const l=Math.hypot(dx,dy)||1;ball.vx=(dx/l)*pwr;ball
 function kickBall(p,dx,dy,pwr){const l=Math.hypot(dx,dy)||1;ball.vx=(dx/l)*pwr;ball.vy=(dy/l)*pwr;ball.owner=null;p.kicking=9;}
 function passTo(psr,tgt){const dx=tgt.x-ball.x,dy=tgt.y-ball.y,l=Math.hypot(dx,dy)||1,pwr=Math.min(PASS_PWR+l*0.025,13);ball.vx=(dx/l)*pwr;ball.vy=(dy/l)*pwr;loose(psr);psr.kicking=7;psr.passCD=40;}
 function moveTo(p,tx,ty){const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy)||1;if(d<6)return;const s=Math.min(p.speed,d*0.25);p.x=clamp(p.x+(dx/d)*s,PAD+PR,W-PAD-PR);p.y=clamp(p.y+(dy/d)*s,PAD+PR,H-PAD-PR);p.facing.x=dx/d;p.facing.y=dy/d;}
-function bestPassTarget(psr,team,enemies){const mates=team.filter(t=>t!==psr&&!t.carrying&&!t.disabled);if(!mates.length)return null;return mates.reduce((a,b)=>{const sa=W-a.x+(enemies.some(c=>distE(a,c)<50)?-40:0);const sb=W-b.x+(enemies.some(c=>distE(b,c)<50)?-40:0);return sa>sb?a:b;});}
+function bestPassTarget(psr,team,enemies){const m=team.filter(t=>t!==psr&&!t.carrying&&!t.disabled);if(!m.length)return null;return m.reduce((a,b)=>(W-a.x+(enemies.some(c=>distE(a,c)<50)?-40:0))>(W-b.x+(enemies.some(c=>distE(b,c)<50)?-40:0))?a:b);}
 function nearestTeammate(p,team){const m=team.filter(t=>t!==p&&!t.disabled);return m.length?m.reduce((a,b)=>distE(p,a)<distE(p,b)?a:b):null;}
 function distE(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
 function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
@@ -530,73 +697,53 @@ function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
 let passHintTimer=0;
 function showPassHint(t){document.getElementById('passTarget').textContent=`Bot ${leftTeam.indexOf(t)}`;document.getElementById('passHint').classList.add('on');passHintTimer=80;}
 
-// ═══════════ GOAL / GAME OVER ═══════════
+// ═══════ GOAL / GAME OVER ═══════
 function flashGoal(msg,team){
-  goalCD=130;
-  allPlayers().forEach(p=>{p.carrying=false;});ball.owner=null;
-  document.getElementById('scL').textContent=scoreL;
-  document.getElementById('scR').textContent=scoreR;
-  // Host broadcasts goal event to guest
-  if(mpMode==='host'&&roomRef){
-    set(ref(db,`rooms/${roomCode}/goal`),{msg,team,sL:scoreL,sR:scoreR,ts:Date.now()}).catch(()=>{});
-  }
+  goalCD=130;allPlayers().forEach(p=>{p.carrying=false;});ball.owner=null;
+  document.getElementById('scL').textContent=scoreL;document.getElementById('scR').textContent=scoreR;
+  if(mpMode==='host'&&roomRef)set(ref(db,`rooms/${roomCode}/goal`),{msg,team,sL:scoreL,sR:scoreR,ts:Date.now()}).catch(()=>{});
   triggerFlash(msg,team);
-  setTimeout(()=>{
-    document.getElementById('message').classList.remove('show');
-    if(scoreL>=5||scoreR>=5)endGame();
-    else{spawnTeams(onlineTeamSize||teamSize);goalCD=0;}
-  },1900);
+  setTimeout(()=>{document.getElementById('message').classList.remove('show');if(scoreL>=5||scoreR>=5)endGame();else{spawnTeams(onlineTeamSize||teamSize);goalCD=0;}},1900);
 }
-
 function triggerFlash(msg,team){
   const el=document.getElementById('message');
-  el.textContent=msg;
-  el.style.color=team==='left'?'#35d470':'#ff5060';
+  el.textContent=msg;el.style.color=team==='left'?'#35d470':'#ff5060';
   el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
 }
 
 function endGame(){
   gameRunning=false;clearInterval(timerInt);
-  const isHost=mpMode==='host',isGuest=mpMode==='guest',isLocal=mpMode==='local';
+  const isLocal=mpMode==='local',isHost=mpMode==='host',isGuest=mpMode==='guest';
   let title,color;
+  if(isLocal){title=scoreL>scoreR?'YOU WIN!':scoreR>scoreL?'CPU WINS!':'DRAW!';color=scoreL>scoreR?'#35d470':scoreR>scoreL?'#ff5060':'#f5c800';}
+  else if(isHost){title=scoreL>scoreR?'YOU WIN!':scoreR>scoreL?'YOU LOSE!':'DRAW!';color=scoreL>scoreR?'#35d470':scoreR>scoreL?'#ff5060':'#f5c800';}
+  else{title=scoreR>scoreL?'YOU WIN!':scoreL>scoreR?'YOU LOSE!':'DRAW!';color=scoreR>scoreL?'#35d470':scoreL>scoreR?'#ff5060':'#f5c800';}
+
   if(isLocal){
-    title=scoreL>scoreR?'YOU WIN!':scoreR>scoreL?'CPU WINS!':'DRAW!';
-    color=scoreL>scoreR?'#35d470':scoreR>scoreL?'#ff5060':'#f5c800';
-  }else if(isHost){
-    title=scoreL>scoreR?'YOU WIN!':scoreR>scoreL?'YOU LOSE!':'DRAW!';
-    color=scoreL>scoreR?'#35d470':scoreR>scoreL?'#ff5060':'#f5c800';
+    document.getElementById('goTitle').textContent=title;document.getElementById('goTitle').style.color=color;
+    document.getElementById('goScore').textContent=`${scoreL} — ${scoreR}`;document.getElementById('goNames').textContent='';
+    show('gameOver');
   }else{
-    // Guest plays right
-    title=scoreR>scoreL?'YOU WIN!':scoreL>scoreR?'YOU LOSE!':'DRAW!';
-    color=scoreR>scoreL?'#35d470':scoreL>scoreR?'#ff5060':'#f5c800';
+    document.getElementById('goTitleOnline').textContent=title;document.getElementById('goTitleOnline').style.color=color;
+    document.getElementById('goScoreOnline').textContent=`${scoreL} — ${scoreR}`;
+    document.getElementById('goNamesOnline').textContent=`${hostName} vs ${guestName}`;
+    if(mpMode==='host'&&roomRef)set(ref(db,`rooms/${roomCode}/gameOver`),{sL:scoreL,sR:scoreR,ts:Date.now()}).catch(()=>{});
+    show('gameOverOnline');cleanupRoom();
   }
-  document.getElementById('goTitle').textContent=title;
-  document.getElementById('goTitle').style.color=color;
-  document.getElementById('goScore').textContent=`${scoreL} — ${scoreR}`;
-  document.getElementById('goSubtitle').textContent='FINAL SCORE';
-  document.getElementById('goNames').textContent=mpMode!=='local'?`${hostName} vs ${guestName}`:'';
-  // Host broadcasts game over
-  if(mpMode==='host'&&roomRef){
-    set(ref(db,`rooms/${roomCode}/gameOver`),{sL:scoreL,sR:scoreR,ts:Date.now()}).catch(()=>{});
-  }
-  show('gameOver');
-  if(mpMode!=='local')cleanupRoom();
 }
 
-// ═══════════ TIMER ═══════════
+// ═══════ TIMER ═══════
 function fmt(s){return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;}
 function startTimer(){
   document.getElementById('timer').textContent=fmt(gameTime);
   timerInt=setInterval(()=>{
-    if(!gameRunning||paused)return;
-    gameTime--;
-    document.getElementById('timer').textContent=fmt(gameTime);
+    if(!gameRunning||paused)return;gameTime--;document.getElementById('timer').textContent=fmt(gameTime);
     if(mpMode==='host'&&roomRef)set(ref(db,`rooms/${roomCode}/timer`),gameTime).catch(()=>{});
     if(gameTime<=0){clearInterval(timerInt);endGame();}
   },1000);
 }
 
-// ═══════════ STATE SYNC ═══════════
+// ═══════ STATE SYNC ═══════
 function serializeState(){
   return{
     ball:{x:Math.round(ball.x*10)/10,y:Math.round(ball.y*10)/10,vx:Math.round(ball.vx*100)/100,vy:Math.round(ball.vy*100)/100,owner:ball.owner||''},
@@ -605,146 +752,144 @@ function serializeState(){
     sL:scoreL,sR:scoreR,ts:Date.now()
   };
 }
-
 function applyRemoteState(s){
   if(!s)return;
-  ball.x+=(s.ball.x-ball.x)*0.5;ball.y+=(s.ball.y-ball.y)*0.5;
-  ball.vx=s.ball.vx;ball.vy=s.ball.vy;ball.owner=s.ball.owner||null;
+  ball.x+=(s.ball.x-ball.x)*0.5;ball.y+=(s.ball.y-ball.y)*0.5;ball.vx=s.ball.vx;ball.vy=s.ball.vy;ball.owner=s.ball.owner||null;
   s.left.forEach((d,i)=>{const p=leftTeam[i];if(!p)return;p.x+=(d.x-p.x)*0.5;p.y+=(d.y-p.y)*0.5;p.facing.x=d.fx;p.facing.y=d.fy;p.carrying=d.c===1;p.kicking=d.k;});
   s.right.forEach((d,i)=>{if(i===0)return;const p=rightTeam[i];if(!p)return;p.x+=(d.x-p.x)*0.5;p.y+=(d.y-p.y)*0.5;p.facing.x=d.fx;p.facing.y=d.fy;p.carrying=d.c===1;p.kicking=d.k;});
-  if(s.sL!==undefined){
-    const prevL=scoreL,prevR=scoreR;
-    scoreL=s.sL;scoreR=s.sR;
-    document.getElementById('scL').textContent=scoreL;
-    document.getElementById('scR').textContent=scoreR;
-  }
+  if(s.sL!==undefined){scoreL=s.sL;scoreR=s.sR;document.getElementById('scL').textContent=scoreL;document.getElementById('scR').textContent=scoreR;}
 }
 
-// ═══════════ ROOM MANAGEMENT ═══════════
+// ═══════ ROOM MANAGEMENT ═══════
 function genCode(){return Math.random().toString(36).substring(2,6).toUpperCase();}
 
 async function hostRoom(){
-  if(!myName){show('nameSetup');return;}
-  roomCode=genCode();
-  roomRef=ref(db,`rooms/${roomCode}`);
-  onlineTeamSize=getOnlineTeamSize();
-  await set(roomRef,{
-    status:'waiting',teamSize:onlineTeamSize,
-    hostName:myName,allyBots:allyBotMode,enemyBots:enemyBotMode,
-    ts:serverTimestamp()
-  });
+  const n=getOnlineTeamSize();
+  roomCode=genCode();roomRef=ref(db,`rooms/${roomCode}`);onlineTeamSize=n;
+  initLobbySlots(n);
+  await set(roomRef,{status:'waiting',teamSize:n,hostName:myName,ts:serverTimestamp()});
   onDisconnect(roomRef).remove();
-  onValue(ref(db,`rooms/${roomCode}/status`),(snap)=>{
-    if(snap.val()==='playing'){
-      get(ref(db,`rooms/${roomCode}/guestName`)).then(s=>{
-        guestName=s.val()||'Guest';
-        opponentName=guestName;
-        hide('waitingRoom');
-        launchOnlineGame('host');
-      });
-    }
+
+  // Watch for guest joining
+  onValue(ref(db,`rooms/${roomCode}/guestName`),(snap)=>{
+    const gn=snap.val();if(!gn)return;
+    guestName=gn;
+    guestJoinLobby(gn);
+    pushLobbyToFirebase();
+    renderLobby(true);
   });
-  document.getElementById('roomCodeDisplay').textContent=roomCode;
-  document.getElementById('roomCodeBox').style.display='block';
-  document.getElementById('waitTitle').textContent='WAITING FOR OPPONENT';
-  document.getElementById('waitStatus').textContent='SHARE THE CODE BELOW ↑';
-  show('waitingRoom');hide('mainMenu');
+
+  document.getElementById('lobbyCodeDisplay').textContent=roomCode;
+  document.getElementById('lobbyTitle').textContent='ROOM LOBBY';
+  renderLobby(true);
+  show('roomLobbyScreen');hide('mainMenu');
 }
 
 async function joinRoom(code){
-  if(!myName){show('nameSetup');return;}
   code=code.toUpperCase().trim();
   if(code.length!==4){setOnlineStatus('Enter a 4-letter code');return;}
   setOnlineStatus('JOINING...');
   const snap=await get(ref(db,`rooms/${code}`));
   if(!snap.exists()||snap.val().status!=='waiting'){setOnlineStatus('Room not found or full');return;}
   const data=snap.val();
-  roomCode=code;onlineTeamSize=data.teamSize||1;
-  allyBotMode=data.allyBots||'full';enemyBotMode=data.enemyBots||'full';
-  hostName=data.hostName||'Host';opponentName=hostName;
+  roomCode=code;onlineTeamSize=data.teamSize||1;hostName=data.hostName||'Host';
   roomRef=ref(db,`rooms/${roomCode}`);
+  // Write our name (triggers host lobby update)
   await set(ref(db,`rooms/${roomCode}/guestName`),myName);
-  await set(ref(db,`rooms/${roomCode}/status`),'playing');
+  guestName=myName;
+
+  // Show guest lobby view (read-only)
+  initLobbySlots(onlineTeamSize);
+  // Place guest in first red slot (host may rearrange via lobby sync)
+  const redIdx=lobbySlots.findIndex(s=>s.team==='red'&&s.type==='empty');
+  if(redIdx!==-1){lobbySlots[redIdx]={team:'red',type:'human',name:myName,isMe:true};}
+  // Sync lobby from host
+  onValue(ref(db,`rooms/${roomCode}/lobby`),(snap)=>{
+    const lb=snap.val();if(!lb)return;
+    lb.forEach((s,i)=>{lobbySlots[i]={...s,isMe:s.name===myName};});
+    renderLobby(false);
+  });
+
+  document.getElementById('lobbyCodeDisplay').textContent=roomCode;
+  document.getElementById('lobbyTitle').textContent='ROOM LOBBY';
+  renderLobby(false);
+  show('roomLobbyScreen');hide('mainMenu');
+
+  // Watch for host starting game
+  onValue(ref(db,`rooms/${roomCode}/status`),(snap)=>{
+    if(snap.val()==='playing')launchOnlineGame('guest');
+    if(snap.val()==='abandoned'&&gameRunning){gameRunning=false;clearInterval(timerInt);cleanupRoom();hideAll();show('oppLeft');}
+  });
+
   inputRef=ref(db,`rooms/${roomCode}/guestInput`);
   onDisconnect(inputRef).remove();
   // Subscribe to game state
   onValue(ref(db,`rooms/${roomCode}/state`),(snap)=>{remoteState=snap.val();pingMs=Date.now()-pingStart;pingStart=Date.now();document.getElementById('pingBadge').textContent=`${pingMs}ms`;});
-  onValue(ref(db,`rooms/${roomCode}/timer`),(snap)=>{if(snap.val()!==null){gameTime=snap.val();document.getElementById('timer').textContent=fmt(gameTime);}});
-  // Listen for goals broadcast by host
+  onValue(ref(db,`rooms/${roomCode}/timer`),(snap)=>{if(snap.val()!=null){gameTime=snap.val();document.getElementById('timer').textContent=fmt(gameTime);}});
   onValue(ref(db,`rooms/${roomCode}/goal`),(snap)=>{
-    const g=snap.val();if(!g)return;
-    scoreL=g.sL;scoreR=g.sR;
-    document.getElementById('scL').textContent=scoreL;
-    document.getElementById('scR').textContent=scoreR;
-    triggerFlash(g.msg,g.team);
-    allPlayers().forEach(p=>{p.carrying=false;});ball.owner=null;
-    goalCD=130;
+    const g=snap.val();if(!g||!gameRunning)return;
+    scoreL=g.sL;scoreR=g.sR;document.getElementById('scL').textContent=scoreL;document.getElementById('scR').textContent=scoreR;
+    triggerFlash(g.msg,g.team);allPlayers().forEach(p=>{p.carrying=false;});ball.owner=null;goalCD=130;
     setTimeout(()=>{document.getElementById('message').classList.remove('show');goalCD=0;},1900);
   });
-  // Listen for game over
-  onValue(ref(db,`rooms/${roomCode}/gameOver`),(snap)=>{
-    const g=snap.val();if(!g||!gameRunning)return;
-    scoreL=g.sL;scoreR=g.sR;
-    endGame();
-  });
-  // Listen for host disconnect
-  onValue(ref(db,`rooms/${roomCode}/status`),(snap)=>{
-    if(snap.val()==='abandoned'&&gameRunning){
-      gameRunning=false;clearInterval(timerInt);cleanupRoom();hideAll();show('oppLeft');
-    }
-  });
-  hide('mainMenu');
-  guestName=myName;
-  launchOnlineGame('guest');
+  onValue(ref(db,`rooms/${roomCode}/gameOver`),(snap)=>{const g=snap.val();if(!g||!gameRunning)return;scoreL=g.sL;scoreR=g.sR;endGame();});
 }
 
 async function quickJoin(){
-  if(!myName){show('nameSetup');return;}
   setOnlineStatus('SEARCHING...');
-  // Find any open room
   const snap=await get(ref(db,'rooms'));
-  if(snap.exists()){
-    const rooms=snap.val();
-    const open=Object.keys(rooms).find(k=>rooms[k].status==='waiting');
-    if(open){
-      document.getElementById('joinInput').value=open;
-      setOnlineStatus(`FOUND ROOM ${open}!`);
-      setTimeout(()=>joinRoom(open),400);
-      return;
-    }
-  }
-  // No room found — create one
+  if(snap.exists()){const rooms=snap.val();const open=Object.keys(rooms).find(k=>rooms[k].status==='waiting');if(open){document.getElementById('joinInput').value=open;setOnlineStatus(`FOUND ROOM ${open}!`);setTimeout(()=>joinRoom(open),400);return;}}
   setOnlineStatus('NO ROOMS FOUND — CREATING ONE...');
   setTimeout(()=>hostRoom(),600);
+}
+
+function startOnlineGame(){
+  // Host presses Start — mark room as playing and launch
+  if(!roomRef)return;
+  set(ref(db,`rooms/${roomCode}/status`),'playing').catch(()=>{});
+  launchOnlineGame('host');
 }
 
 function cleanupRoom(){
   clearInterval(syncInterval);syncInterval=null;
   if(roomRef){
-    if(mpMode==='host'){
-      // Signal guest that host left
-      set(ref(db,`rooms/${roomCode}/status`),'abandoned').then(()=>remove(roomRef).catch(()=>{})).catch(()=>{});
-    } else if(inputRef){
-      remove(inputRef).catch(()=>{});
-    }
+    if(mpMode==='host')set(ref(db,`rooms/${roomCode}/status`),'abandoned').then(()=>remove(roomRef).catch(()=>{})).catch(()=>{});
+    else if(inputRef)remove(inputRef).catch(()=>{});
   }
   roomRef=null;inputRef=null;roomCode=null;
   document.getElementById('pingBadge').style.display='none';
 }
 
-function getOnlineTeamSize(){
-  const sel=document.querySelector('#onlineSzRow .sz.sel');
-  return sel?parseInt(sel.dataset.on):1;
-}
+function getOnlineTeamSize(){const sel=document.querySelector('#onlineSzRow .sz.sel');return sel?parseInt(sel.dataset.on):1;}
 
 function launchOnlineGame(role){
   mpMode=role;
   scoreL=0;scoreR=0;gameTime=90;stamina=100;goalCD=0;paused=false;
   document.getElementById('scL').textContent='0';document.getElementById('scR').textContent='0';
   document.getElementById('timer').textContent='01:30';
-  if(role==='host'){hostName=myName;}else{guestName=myName;}
+  if(role==='host'){hostName=myName;}
+  // Determine player positions from lobby
+  const greens=lobbySlots.filter(s=>s.team==='green');
+  const reds=lobbySlots.filter(s=>s.team==='red');
+  // Find which slot index is "me"
+  const myGreenIdx=greens.findIndex(s=>s.isMe);
+  const myRedIdx=reds.findIndex(s=>s.isMe);
   spawnTeams(onlineTeamSize);
   if(role==='host'){
+    // Host is left team
+    leftTeam.forEach((p,i)=>{
+      const sl=greens[i];if(!sl)return;
+      if(sl.type==='bot'){p.isHuman=false;p.isRemote=false;}
+      else if(sl.type==='empty'){p.disabled=true;}
+      else if(sl.isMe){p.isHuman=true;}
+      else{p.isHuman=false;p.isRemote=true;}
+    });
+    rightTeam.forEach((p,i)=>{
+      const sl=reds[i];if(!sl)return;
+      if(sl.type==='bot'){p.isHuman=false;p.isRemote=false;}
+      else if(sl.type==='empty'){p.disabled=true;}
+      else{p.isHuman=false;p.isRemote=true;} // guest
+    });
     inputRef=ref(db,`rooms/${roomCode}/guestInput`);
     onValue(inputRef,(snap)=>{remoteState=snap.val();});
     syncInterval=setInterval(()=>{if(!gameRunning)return;set(ref(db,`rooms/${roomCode}/state`),serializeState()).catch(()=>{});},Math.round(1000/SYNC_HZ));
@@ -752,6 +897,7 @@ function launchOnlineGame(role){
     document.getElementById('tnR').textContent=guestName||'Guest';
     document.getElementById('pingBadge').style.display='inline-block';
   }else{
+    // Guest is right team (right[0] = guest's human)
     rightTeam[0].isHuman=true;rightTeam[0].isRemote=false;
     leftTeam[0].isHuman=false;leftTeam[0].isRemote=true;
     document.getElementById('tnL').textContent=hostName||'Host';
@@ -762,13 +908,13 @@ function launchOnlineGame(role){
   if(role==='host')startTimer();
 }
 
-// ═══════════ PAUSE ═══════════
+// ═══════ PAUSE ═══════
 function togglePause(){paused=!paused;paused?show('pauseMenu'):hide('pauseMenu');}
 
-// ═══════════ OVERLAYS ═══════════
+// ═══════ OVERLAYS ═══════
 function show(id){document.getElementById(id).classList.add('on');}
 function hide(id){document.getElementById(id).classList.remove('on');}
-function hideAll(){['mainMenu','pauseMenu','gameOver','waitingRoom','nameSetup','changeNameMenu','oppLeft'].forEach(hide);}
+function hideAll(){['mainMenu','pauseMenu','gameOver','gameOverOnline','roomLobbyScreen','nameSetup','changeNameMenu','oppLeft'].forEach(hide);}
 function setOnlineStatus(t){document.getElementById('onlineStatus').textContent=t;}
 
 function startLocalGame(){
@@ -782,24 +928,17 @@ function startLocalGame(){
   spawnTeams(teamSize);gameRunning=true;clearInterval(timerInt);startTimer();
 }
 
-// ═══════════ GAME LOOP ═══════════
+// ═══════ GAME LOOP ═══════
 function gameLoop(){
   ctx.clearRect(0,0,W,H);drawField();
   if(gameRunning&&!paused&&goalCD===0){
     if(mpMode==='local'){
-      updateHuman(leftTeam[0]);
-      leftTeam.slice(1).forEach(p=>updateAllyBot(p));
-      rightTeam.forEach(p=>updateCPUBot(p));
-      updateBall();
+      updateHuman(leftTeam[0]);leftTeam.slice(1).forEach(p=>updateAllyBot(p));rightTeam.forEach(p=>updateCPUBot(p));updateBall();
     }else if(mpMode==='host'){
-      updateHuman(leftTeam[0]);
-      leftTeam.slice(1).forEach(p=>updateAllyBot(p));
-      applyRemoteInput(rightTeam[0],remoteState);
-      rightTeam.slice(1).forEach(p=>updateCPUBot(p));
-      updateBall();
+      updateHuman(leftTeam[0]);leftTeam.slice(1).forEach(p=>updateAllyBot(p));
+      applyRemoteInput(rightTeam[0],remoteState);rightTeam.slice(1).forEach(p=>updateCPUBot(p));updateBall();
     }else if(mpMode==='guest'){
-      applyRemoteState(remoteState);
-      updateHuman(rightTeam[0]);
+      applyRemoteState(remoteState);updateHuman(rightTeam[0]);
     }
     if(passHintTimer>0){passHintTimer--;if(passHintTimer===0)document.getElementById('passHint').classList.remove('on');}
   }
@@ -808,60 +947,63 @@ function gameLoop(){
   if(carrier){ctx.fillStyle=carrier.team==='left'?'rgba(245,200,0,.22)':'rgba(255,80,96,.22)';ctx.beginPath();ctx.arc(ball.x,ball.y,BR+8,0,Math.PI*2);ctx.fill();}
   drawBall(ball);
   leftTeam.forEach((p,i)=>drawPlayer(p,i===0?(mpMode==='local'?'YOU':myName.substring(0,4)):`A${i}`,i===0&&mpMode!=='guest'));
-  rightTeam.forEach((p,i)=>drawPlayer(p,i===0?(mpMode==='guest'?myName.substring(0,4):`C1`):`C${i+1}`,i===0&&mpMode==='guest'));
+  rightTeam.forEach((p,i)=>drawPlayer(p,i===0?(mpMode==='guest'?myName.substring(0,4):'C1'):`C${i+1}`,i===0&&mpMode==='guest'));
   requestAnimationFrame(gameLoop);
 }
 
-// ═══════════ UI WIRING ═══════════
+// ═══════ UI WIRING ═══════
 // Tabs
-document.getElementById('tabLocal') .addEventListener('click',()=>{document.getElementById('tabLocal').classList.add('sel');document.getElementById('tabOnline').classList.remove('sel');document.getElementById('localPanel').style.display='flex';document.getElementById('onlinePanel').style.display='none';});
-document.getElementById('tabOnline').addEventListener('click',()=>{document.getElementById('tabOnline').classList.add('sel');document.getElementById('tabLocal').classList.remove('sel');document.getElementById('onlinePanel').style.display='flex';document.getElementById('localPanel').style.display='none';});
+document.getElementById('tabLocal').addEventListener('click',()=>{
+  document.getElementById('tabLocal').classList.add('sel');document.getElementById('tabOnline').classList.remove('sel');
+  document.getElementById('localPanel').style.display='flex';document.getElementById('onlinePanel').style.display='none';
+});
+document.getElementById('tabOnline').addEventListener('click',()=>{
+  document.getElementById('tabOnline').classList.add('sel');document.getElementById('tabLocal').classList.remove('sel');
+  document.getElementById('onlinePanel').style.display='flex';document.getElementById('localPanel').style.display='none';
+});
 
-// Local size
+// Size pickers
 document.querySelectorAll('#localPanel .sz').forEach(el=>{el.addEventListener('click',()=>{document.querySelectorAll('#localPanel .sz').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');teamSize=parseInt(el.dataset.n);});});
-// Online size
 document.querySelectorAll('#onlineSzRow .sz').forEach(el=>{el.addEventListener('click',()=>{document.querySelectorAll('#onlineSzRow .sz').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');});});
-// Bot mode selects
-document.getElementById('selAllyBots').addEventListener('change',e=>{allyBotMode=e.target.value;});
-document.getElementById('selEnemyBots').addEventListener('change',e=>{enemyBotMode=e.target.value;});
 
 // Name setup
-document.getElementById('btnSaveName').addEventListener('click',()=>{
-  const n=document.getElementById('nameInput').value.trim();
-  if(!n){document.getElementById('nameInput').focus();return;}
-  saveName(n);hide('nameSetup');show('mainMenu');
-});
-document.getElementById('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter'){document.getElementById('btnSaveName').click();}});
+document.getElementById('btnSaveName').addEventListener('click',()=>{const n=document.getElementById('nameInput').value.trim();if(!n){document.getElementById('nameInput').focus();return;}saveName(n);hide('nameSetup');show('mainMenu');});
+document.getElementById('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('btnSaveName').click();});
 
-// Name badge → change name
+// Name badge
 document.getElementById('nameBadge').addEventListener('click',()=>{document.getElementById('changeNameInput').value=myName;show('changeNameMenu');});
-document.getElementById('btnConfirmName').addEventListener('click',()=>{const n=document.getElementById('changeNameInput').value.trim();if(n){saveName(n);}hide('changeNameMenu');});
+document.getElementById('btnConfirmName').addEventListener('click',()=>{const n=document.getElementById('changeNameInput').value.trim();if(n)saveName(n);hide('changeNameMenu');});
 document.getElementById('changeNameInput').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('btnConfirmName').click();});
 document.getElementById('btnCancelName').addEventListener('click',()=>hide('changeNameMenu'));
 
-// Main menu buttons
+// Main menu
 document.getElementById('btnStart')    .addEventListener('click',()=>startLocalGame());
 document.getElementById('btnHost')     .addEventListener('click',()=>hostRoom());
 document.getElementById('btnJoin')     .addEventListener('click',()=>joinRoom(document.getElementById('joinInput').value));
 document.getElementById('joinInput')   .addEventListener('keydown',e=>{if(e.key==='Enter')joinRoom(e.target.value);});
 document.getElementById('btnQuickJoin').addEventListener('click',()=>quickJoin());
-document.getElementById('btnCancelWait').addEventListener('click',()=>{cleanupRoom();hideAll();show('mainMenu');mpMode='local';});
+
+// Lobby
+document.getElementById('btnLobbyStart').addEventListener('click',()=>startOnlineGame());
+document.getElementById('btnLobbyCancel').addEventListener('click',()=>{cleanupRoom();hideAll();show('mainMenu');mpMode='local';});
 
 // Pause
-document.getElementById('btnResume')  .addEventListener('click',()=>togglePause());
-document.getElementById('btnRestart') .addEventListener('click',()=>{paused=false;if(mpMode==='local')startLocalGame();else{cleanupRoom();mpMode='local';startLocalGame();}});
+document.getElementById('btnResume') .addEventListener('click',()=>togglePause());
+document.getElementById('btnRestart').addEventListener('click',()=>{paused=false;if(mpMode==='local')startLocalGame();else{cleanupRoom();mpMode='local';startLocalGame();}});
 document.getElementById('btnMainMenu').addEventListener('click',()=>{gameRunning=false;paused=false;clearInterval(timerInt);cleanupRoom();mpMode='local';hideAll();show('mainMenu');});
 
-// Game over
-document.getElementById('btnAgain')  .addEventListener('click',()=>{if(mpMode==='local')startLocalGame();else{cleanupRoom();mpMode='local';startLocalGame();}});
-document.getElementById('btnGoMain') .addEventListener('click',()=>{cleanupRoom();mpMode='local';hideAll();show('mainMenu');});
+// Game over — local
+document.getElementById('btnAgainLocal').addEventListener('click',()=>startLocalGame());
+document.getElementById('btnGoMain')    .addEventListener('click',()=>{cleanupRoom();mpMode='local';hideAll();show('mainMenu');});
+// Game over — online (only main menu, no play again)
+document.getElementById('btnGoMainOnline').addEventListener('click',()=>{cleanupRoom();mpMode='local';hideAll();show('mainMenu');});
 
 // Opponent left
-document.getElementById('btnOppBack').addEventListener('click',()=>{hideAll();show('mainMenu');});
+document.getElementById('btnOppBack').addEventListener('click',()=>{cleanupRoom();mpMode='local';hideAll();show('mainMenu');});
 
-// Boot — show name screen first if no name saved, else go to menu
+// Boot
 spawnTeams(1);
-if(myName){updateNameBadge();show('mainMenu');}else{show('nameSetup');}
+if(myName){document.getElementById('nameBadge').textContent='✏ '+myName;show('mainMenu');}else{show('nameSetup');}
 requestAnimationFrame(gameLoop);
 </script>
 </body>
