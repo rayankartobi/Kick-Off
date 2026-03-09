@@ -620,42 +620,77 @@ function updateHuman(p){
   if(keys['KeyW']||keys['ArrowUp'])dy=-1;if(keys['KeyS']||keys['ArrowDown'])dy=1;
   if(dx&&dy){dx*=.707;dy*=.707;}if(dx||dy){p.facing.x=dx;p.facing.y=dy;}
   p.x=clamp(p.x+dx*spd,PAD+PR,W-PAD-PR);p.y=clamp(p.y+dy*spd,PAD+PR,H-PAD-PR);
-  const db=distE(p,ball);
-  const enemies=p.team==='left'?rightTeam:leftTeam;
-  if(!p.carrying&&ball.owner===null&&db<TRAP_D&&Math.hypot(ball.vx,ball.vy)<2)trap(p);
-  if(eat('KeyE')){const ec=enemies.find(e=>e.carrying&&!e.disabled&&distE(p,e)<TACKLE_D);if(ec){loose(ec);trap(p);p.kicking=10;}else if(!p.carrying&&ball.owner!==p.team&&db<TRAP_D+10)trap(p);}
-  if(p.carrying){enemies.forEach(e=>{if(!e.disabled&&e.tackleCD===0&&distE(p,e)<PR*2+3&&Math.random()<0.018){loose(p);ball.vx=(Math.random()-.5)*5;ball.vy=(Math.random()-.5)*5;e.tackleCD=70;}});}
-  if(p.carrying)attachBall(p);
-  if(eat('Space')){if(p.carrying)shoot(p,p.facing.x,p.facing.y,KICK_PWR);else if(db<TRAP_D+8&&ball.owner!==p.team){const ang=Math.atan2(ball.y-p.y,ball.x-p.x);kickBall(p,Math.cos(ang),Math.sin(ang),KICK_PWR);}}
-  const allies=p.team==='left'?leftTeam:rightTeam;
-  if(eat('KeyQ')&&allies.filter(t=>!t.disabled).length>1){
-    const t=nearestTeammate(p,allies);
-    if(t&&p.carrying){passTo(p,t);showPassHint(t);}
-    else if(t&&distE(p,ball)<TRAP_D+8&&ball.owner!==p.team){trap(p);passTo(p,t);showPassHint(t);}
-  }
-  if(p.kicking>0)p.kicking--;
+  // Capture action keys FIRST before any eat() consumes them
+  const actShoot=!!just['Space'];
+  const actTackle=!!just['KeyE'];
+  const actPass=!!just['KeyQ'];
+  eat('Space');eat('KeyE');eat('KeyQ'); // consume so they don't repeat
+
   if(mpMode==='guest'&&inputRef){
-    // Find our slot index so host knows which player to update
+    // Guest: send position + action flags to host who runs physics
     const allP=[...leftTeam,...rightTeam];
-    const myIdx=allP.findIndex(p=>p.isHuman&&!p.isRemote);
+    const myIdx=allP.findIndex(q=>q.isHuman&&!q.isRemote);
     const myTeam=myIdx<leftTeam.length?'left':'right';
     const myTeamIdx=myTeam==='left'?myIdx:myIdx-leftTeam.length;
-    set(inputRef,{x:p.x,y:p.y,fx:p.facing.x,fy:p.facing.y,carrying:p.carrying,kicking:p.kicking,team:myTeam,idx:myTeamIdx,ts:Date.now()}).catch(()=>{});
+    set(inputRef,{
+      x:p.x,y:p.y,fx:p.facing.x,fy:p.facing.y,
+      team:myTeam,idx:myTeamIdx,
+      doShoot:actShoot?1:0,doTackle:actTackle?1:0,doPass:actPass?1:0,
+      ts:Date.now()
+    }).catch(()=>{});
+    if(p.carrying)attachBall(p); // visual only on guest side
+    if(p.kicking>0)p.kicking--;
+    return;
   }
+  // Local / host: run full physics
+  const db2=distE(p,ball);
+  const enemies=p.team==='left'?rightTeam:leftTeam;
+  if(!p.carrying&&ball.owner===null&&db2<TRAP_D&&Math.hypot(ball.vx,ball.vy)<2)trap(p);
+  if(actTackle){const ec=enemies.find(e=>e.carrying&&!e.disabled&&distE(p,e)<TACKLE_D);if(ec){loose(ec);trap(p);p.kicking=10;}else if(!p.carrying&&ball.owner!==p.team&&db2<TRAP_D+10)trap(p);}
+  if(p.carrying){enemies.forEach(e=>{if(!e.disabled&&e.tackleCD===0&&distE(p,e)<PR*2+3&&Math.random()<0.018){loose(p);ball.vx=(Math.random()-.5)*5;ball.vy=(Math.random()-.5)*5;e.tackleCD=70;}});}
+  if(p.carrying)attachBall(p);
+  if(actShoot){if(p.carrying)shoot(p,p.facing.x,p.facing.y,KICK_PWR);else if(db2<TRAP_D+8&&ball.owner!==p.team){const ang=Math.atan2(ball.y-p.y,ball.x-p.x);kickBall(p,Math.cos(ang),Math.sin(ang),KICK_PWR);}}
+  const allies=p.team==='left'?leftTeam:rightTeam;
+  if(actPass&&allies.filter(t=>!t.disabled).length>1){
+    const t=nearestTeammate(p,allies);
+    if(t&&p.carrying){passTo(p,t);showPassHint(t);}
+    else if(t&&db2<TRAP_D+8&&ball.owner!==p.team){trap(p);passTo(p,t);showPassHint(t);}
+  }
+  if(p.kicking>0)p.kicking--;
 }
 
-function applyRemoteInput(p,inp){
+function applyRemoteInput(dummy,inp){
   if(!inp)return;
-  // inp may contain team+idx to find the right player
-  let target=p;
+  let p=dummy;
   if(inp.team&&inp.idx!==undefined){
     const arr=inp.team==='left'?leftTeam:rightTeam;
-    if(arr[inp.idx])target=arr[inp.idx];
+    if(arr[inp.idx])p=arr[inp.idx];
   }
-  target.x+=(inp.x-target.x)*0.4;target.y+=(inp.y-target.y)*0.4;
-  target.facing.x=inp.fx||target.facing.x;target.facing.y=inp.fy||target.facing.y;
-  target.carrying=inp.carrying||false;target.kicking=inp.kicking||0;
-  if(target.carrying)attachBall(target);
+  p.x+=(inp.x-p.x)*0.4;p.y+=(inp.y-p.y)*0.4;
+  p.facing.x=inp.fx||p.facing.x;p.facing.y=inp.fy||p.facing.y;
+  if(p.kicking>0)p.kicking--;
+  const enemies=p.team==='left'?rightTeam:leftTeam;
+  const db=distE(p,ball);
+  if(!p.carrying&&ball.owner===null&&db<TRAP_D&&Math.hypot(ball.vx,ball.vy)<2)trap(p);
+  if(inp.doTackle){
+    const ec=enemies.find(e=>e.carrying&&!e.disabled&&distE(p,e)<TACKLE_D);
+    if(ec){loose(ec);trap(p);p.kicking=10;}
+    else if(!p.carrying&&ball.owner!==p.team&&db<TRAP_D+10)trap(p);
+  }
+  if(inp.doShoot){
+    if(p.carrying)shoot(p,p.facing.x,p.facing.y,KICK_PWR);
+    else if(db<TRAP_D+8&&ball.owner!==p.team){const ang=Math.atan2(ball.y-p.y,ball.x-p.x);kickBall(p,Math.cos(ang),Math.sin(ang),KICK_PWR);}
+  }
+  if(inp.doPass){
+    const allies=p.team==='left'?leftTeam:rightTeam;
+    const t=nearestTeammate(p,allies);
+    if(t&&p.carrying)passTo(p,t);
+    else if(t&&db<TRAP_D+8&&ball.owner!==p.team){trap(p);passTo(p,t);}
+  }
+  if(p.carrying){
+    enemies.forEach(e=>{if(!e.disabled&&e.tackleCD===0&&distE(p,e)<PR*2+3&&Math.random()<0.018){loose(p);ball.vx=(Math.random()-.5)*5;ball.vy=(Math.random()-.5)*5;e.tackleCD=70;}});
+    attachBall(p);
+  }
 }
 
 // ═══════ ALLY BOT ═══════
@@ -802,8 +837,8 @@ function startTimer(){
 function serializeState(){
   return{
     ball:{x:Math.round(ball.x*10)/10,y:Math.round(ball.y*10)/10,vx:Math.round(ball.vx*100)/100,vy:Math.round(ball.vy*100)/100,owner:ball.owner||''},
-    left:leftTeam.map(p=>({x:Math.round(p.x*10)/10,y:Math.round(p.y*10)/10,fx:Math.round(p.facing.x*100)/100,fy:Math.round(p.facing.y*100)/100,c:p.carrying?1:0,k:p.kicking})),
-    right:rightTeam.map(p=>({x:Math.round(p.x*10)/10,y:Math.round(p.y*10)/10,fx:Math.round(p.facing.x*100)/100,fy:Math.round(p.facing.y*100)/100,c:p.carrying?1:0,k:p.kicking})),
+    left:leftTeam.map(p=>({x:Math.round(p.x*10)/10,y:Math.round(p.y*10)/10,fx:Math.round(p.facing.x*100)/100,fy:Math.round(p.facing.y*100)/100,c:p.carrying?1:0,k:p.kicking,d:p.disabled?1:0})),
+    right:rightTeam.map(p=>({x:Math.round(p.x*10)/10,y:Math.round(p.y*10)/10,fx:Math.round(p.facing.x*100)/100,fy:Math.round(p.facing.y*100)/100,c:p.carrying?1:0,k:p.kicking,d:p.disabled?1:0})),
     sL:scoreL,sR:scoreR,ts:Date.now()
   };
 }
@@ -811,11 +846,15 @@ function applyRemoteState(s){
   if(!s)return;
   ball.x+=(s.ball.x-ball.x)*0.5;ball.y+=(s.ball.y-ball.y)*0.5;ball.vx=s.ball.vx;ball.vy=s.ball.vy;ball.owner=s.ball.owner||null;
   s.left.forEach((d,i)=>{
-    const p=leftTeam[i];if(!p||p.isHuman)return; // skip our own player
+    const p=leftTeam[i];if(!p||p.isHuman)return;
+    p.disabled=d.d===1;
+    if(p.disabled){p.carrying=false;return;}
     p.x+=(d.x-p.x)*0.5;p.y+=(d.y-p.y)*0.5;p.facing.x=d.fx;p.facing.y=d.fy;p.carrying=d.c===1;p.kicking=d.k;
   });
   s.right.forEach((d,i)=>{
-    const p=rightTeam[i];if(!p||p.isHuman)return; // skip our own player
+    const p=rightTeam[i];if(!p||p.isHuman)return;
+    p.disabled=d.d===1;
+    if(p.disabled){p.carrying=false;return;}
     p.x+=(d.x-p.x)*0.5;p.y+=(d.y-p.y)*0.5;p.facing.x=d.fx;p.facing.y=d.fy;p.carrying=d.c===1;p.kicking=d.k;
   });
   if(s.sL!==undefined){scoreL=s.sL;scoreR=s.sR;document.getElementById('scL').textContent=scoreL;document.getElementById('scR').textContent=scoreR;}
@@ -830,17 +869,25 @@ async function hostRoom(){
   initLobbySlots(n);
   await set(roomRef,{status:'waiting',teamSize:n,hostName:myName,ts:serverTimestamp()});
   onDisconnect(roomRef).remove();
+  // Push initial lobby immediately so guest can see it on first subscribe
+  pushLobbyToFirebase();
 
   // Watch for guest joining OR leaving
   onValue(ref(db,`rooms/${roomCode}/guestName`),(snap)=>{
     const gn=snap.val();
     if(gn){
-      // Guest joined
       guestName=gn;
-      guestJoinLobby(gn);
+      // Only add them if not already in lobby (avoid duplicates on reconnect)
+      const already=lobbySlots.some(s=>s.type==='human'&&s.name===gn&&!s.isMe);
+      if(!already)guestJoinLobby(gn);
     }else{
-      // Guest left — remove all non-isMe human slots
+      guestName='';
       lobbySlots.forEach(s=>{if(s.type==='human'&&!s.isMe){s.type='empty';s.name='';}});
+      // If game is running, disable the remote player
+      if(gameRunning){
+        [...leftTeam,...rightTeam].forEach(p=>{if(p.isRemote){p.disabled=true;p.carrying=false;}});
+        ball.owner=null;
+      }
     }
     pushLobbyToFirebase();
     renderLobby(true);
@@ -900,6 +947,9 @@ async function joinRoom(code){
   });
 
   inputRef=ref(db,`rooms/${roomCode}/guestInput`);
+  // Remove guestName AND input on disconnect so host reacts properly
+  const guestNameRef=ref(db,`rooms/${roomCode}/guestName`);
+  onDisconnect(guestNameRef).remove();
   onDisconnect(inputRef).remove();
   // Subscribe to game state
   onValue(ref(db,`rooms/${roomCode}/state`),(snap)=>{remoteState=snap.val();pingMs=Date.now()-pingStart;pingStart=Date.now();document.getElementById('pingBadge').textContent=`${pingMs}ms`;});
@@ -941,9 +991,14 @@ function startOnlineGame(){
 
 function cleanupRoom(){
   clearInterval(syncInterval);syncInterval=null;
-  if(roomRef){
-    if(mpMode==='host')set(ref(db,`rooms/${roomCode}/status`),'abandoned').then(()=>remove(roomRef).catch(()=>{})).catch(()=>{});
-    else if(inputRef)remove(inputRef).catch(()=>{});
+  if(roomRef&&roomCode){
+    if(mpMode==='host'){
+      set(ref(db,`rooms/${roomCode}/status`),'abandoned').then(()=>remove(roomRef).catch(()=>{})).catch(()=>{});
+    }else{
+      // Guest: remove their name (host listener will clear their slot)
+      set(ref(db,`rooms/${roomCode}/guestName`),null).catch(()=>{});
+      if(inputRef)remove(inputRef).catch(()=>{});
+    }
   }
   roomRef=null;inputRef=null;roomCode=null;
   document.getElementById('pingBadge').style.display='none';
