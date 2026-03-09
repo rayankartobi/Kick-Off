@@ -552,6 +552,7 @@ function updateHuman(p){
     const mt=mi>=0&&mi<leftTeam.length?'left':'right';
     const mti=mt==='left'?mi:mi-leftTeam.length;
     set(inputRef,{x:p.x,y:p.y,fx:p.facing.x,fy:p.facing.y,team:mt,idx:mti,
+      carrying:p.carrying?1:0,
       doShoot:doShoot?1:0,doTackle:doTackle?1:0,doPass:doPass?1:0,ts:Date.now()}).catch(()=>{});
     if(p.carrying)attachBall(p);
     if(p.kicking>0)p.kicking--;
@@ -590,7 +591,11 @@ function applyRemoteInput(inp){
   if(!p||p.disabled)return;
   // Snap position — guest is authoritative for their own movement
   p.x=clamp(inp.x,PAD+PR,W-PAD-PR);p.y=clamp(inp.y,PAD+PR,H-PAD-PR);
-  p.facing.x=inp.fx||p.facing.x;p.facing.y=inp.fy||p.facing.y;
+  p.facing.x=inp.fx!==undefined?inp.fx:p.facing.x;
+  p.facing.y=inp.fy!==undefined?inp.fy:p.facing.y;
+  // Sync carry state from guest (they are authoritative for their own carry)
+  const wasCarrying=p.carrying;
+  if(inp.carrying){p.carrying=true;ball.owner=p.team;}
   if(p.kicking>0)p.kicking--;
   const enemies=p.team==='left'?rightTeam:leftTeam;
   const db=distE(p,ball);
@@ -611,7 +616,8 @@ function applyRemoteInput(inp){
   }
   if(p.carrying){
     enemies.forEach(e=>{if(!e.disabled&&e.tackleCD===0&&distE(p,e)<PR*2+3&&Math.random()<0.018){loose(p);ball.vx=(Math.random()-.5)*5;ball.vy=(Math.random()-.5)*5;e.tackleCD=70;}});
-    attachBall(p);
+    // Only call attachBall if NOT a guest-reported carry — guest's ball position is already correct
+    if(!inp.carrying)attachBall(p);
   }
 }
 
@@ -711,7 +717,7 @@ function flashGoal(scoringTeam){
   if(mpMode!=='guest'){
     let myTeam='left'; // host is always left; local also left
     const iScored=scoringTeam===myTeam;
-    const msg=iScored?'⚽  GOAL!':'THEY SCORE!';
+    const msg=iScored?'⚽  GOAL!':'SCORED!';
     const color=iScored?'#35d470':'#ff5060';
     triggerFlash(msg,color);
   }
@@ -780,26 +786,35 @@ function serializeState(){
 }
 
 // Guest applies host state.
-// Ball is SNAPPED (not lerped) — this is the key fix for "ball feels laggy"
-// Own player (isHuman) is skipped — we move ourselves locally
 function applyRemoteState(s){
   if(!s)return;
-  // Snap ball — immediate, no lag
-  ball.x=s.ball.x;ball.y=s.ball.y;
-  ball.vx=s.ball.vx;ball.vy=s.ball.vy;
-  ball.owner=s.ball.owner||null;
-  s.left.forEach((d,i)=>{
-    const p=leftTeam[i];if(!p||p.isHuman)return;
-    p.disabled=d.d===1;if(p.disabled){p.carrying=false;return;}
-    p.x+=(d.x-p.x)*0.65;p.y+=(d.y-p.y)*0.65;
-    p.facing.x=d.fx;p.facing.y=d.fy;p.carrying=d.c===1;p.kicking=d.k;
-  });
-  s.right.forEach((d,i)=>{
-    const p=rightTeam[i];if(!p||p.isHuman)return;
-    p.disabled=d.d===1;if(p.disabled){p.carrying=false;return;}
-    p.x+=(d.x-p.x)*0.65;p.y+=(d.y-p.y)*0.65;
-    p.facing.x=d.fx;p.facing.y=d.fy;p.carrying=d.c===1;p.kicking=d.k;
-  });
+  const myP=[...leftTeam,...rightTeam].find(p=>p.isHuman&&!p.isRemote);
+  const guestCarrying=myP&&myP.carrying;
+  // Only snap ball when guest isnt carrying locally — avoids fighting attachBall
+  if(!guestCarrying){
+    ball.x=s.ball.x;ball.y=s.ball.y;
+    ball.vx=s.ball.vx;ball.vy=s.ball.vy;
+    ball.owner=s.ball.owner||null;
+  }
+  const applyArr=(arr,data)=>{
+    data.forEach((d,i)=>{
+      const p=arr[i];if(!p)return;
+      p.disabled=d.d===1;
+      if(p.disabled){p.carrying=false;return;}
+      if(p.isHuman){
+        // Own player: sync carry loss from host and kicking animation
+        if(p.carrying&&d.c===0)loose(p);
+        p.kicking=d.k;
+        // Snap position on large teleport (goal reset by host)
+        if(Math.hypot(d.x-p.x,d.y-p.y)>80){p.x=d.x;p.y=d.y;}
+        return;
+      }
+      p.x+=(d.x-p.x)*0.65;p.y+=(d.y-p.y)*0.65;
+      p.facing.x=d.fx;p.facing.y=d.fy;p.carrying=d.c===1;p.kicking=d.k;
+    });
+  };
+  applyArr(leftTeam,s.left);
+  applyArr(rightTeam,s.right);
   if(s.sL!==undefined){scoreL=s.sL;scoreR=s.sR;document.getElementById('scL').textContent=scoreL;document.getElementById('scR').textContent=scoreR;}
 }
 
@@ -885,13 +900,15 @@ async function joinRoom(code){
     const g=snap.val();if(!g||!gameRunning)return;
     scoreL=g.sL;scoreR=g.sR;
     document.getElementById('scL').textContent=scoreL;document.getElementById('scR').textContent=scoreR;
-    // Guest determines their own message
     const myP=[...leftTeam,...rightTeam].find(p=>p.isHuman&&!p.isRemote);
     const mt=myP?myP.team:'right';
     const iScored=g.scoringTeam===mt;
-    triggerFlash(iScored?'⚽  GOAL!':'THEY SCORE!',iScored?'#35d470':'#ff5060');
+    triggerFlash(iScored?'⚽  GOAL!':'SCORED!',iScored?'#35d470':'#ff5060');
     allPlayers().forEach(p=>{p.carrying=false;});ball.owner=null;goalCD=130;
-    setTimeout(()=>{document.getElementById('message').classList.remove('show');goalCD=0;},1900);
+    setTimeout(()=>{
+      document.getElementById('message').classList.remove('show');
+      goalCD=0; // applyRemoteState (running every frame) will sync/snap our position from host
+    },1900);
   });
   onValue(ref(db,`rooms/${roomCode}/gameOver`),(snap)=>{const g=snap.val();if(!g||!gameRunning)return;scoreL=g.sL;scoreR=g.sR;endGame();});
 }
@@ -957,6 +974,8 @@ function launchOnlineGame(role,gsi){
 function backToLobby(){
   gameRunning=false;paused=false;
   clearInterval(timerInt);clearInterval(syncInterval);syncInterval=null;
+  // Clear teams so canvas draws nothing while in lobby
+  leftTeam=[];rightTeam=[];ball=makeBall();
   scoreL=0;scoreR=0;gameTime=90;goalCD=0;stamina=100;
   document.getElementById('scL').textContent='0';document.getElementById('scR').textContent='0';
   document.getElementById('timer').textContent='01:30';
@@ -1001,6 +1020,10 @@ function startLocalGame(){
 // ── GAME LOOP ──
 function gameLoop(){
   ctx.clearRect(0,0,W,H);drawField();
+
+  // Guest always syncs state from host — even during goalCD — so position resets reach them
+  if(mpMode==='guest'&&gameRunning)applyRemoteState(remoteState);
+
   if(gameRunning&&!paused&&goalCD===0){
     if(mpMode==='local'){
       updateHuman(leftTeam[0]);
@@ -1008,7 +1031,6 @@ function gameLoop(){
       rightTeam.forEach(p=>updateCPUBot(p));
       updateBall();
     }else if(mpMode==='host'){
-      // Process all players by role
       [...leftTeam,...rightTeam].forEach(p=>{
         if(p.disabled)return;
         if(p.isHuman)updateHuman(p);
@@ -1018,9 +1040,8 @@ function gameLoop(){
       });
       updateBall();
     }else if(mpMode==='guest'){
-      applyRemoteState(remoteState); // snap ball + lerp others
       const myP=[...leftTeam,...rightTeam].find(p=>p.isHuman&&!p.isRemote);
-      if(myP)updateHuman(myP);   // update own player instantly
+      if(myP)updateHuman(myP);
     }
     if(passHintTimer>0){passHintTimer--;if(passHintTimer===0)document.getElementById('passHint').classList.remove('on');}
   }
