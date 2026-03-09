@@ -370,6 +370,7 @@ function makePlayer(x,y,team,isHuman,isRemote=false){
   return{x,y,r:PR,team,isHuman,isRemote,carrying:false,kicking:0,
     facing:{x:team==='left'?1:-1,y:0},speed:isHuman?3.8:(team==='left'?3.2:2.9),sprintSpd:5.8,
     bt:0,role:'attack',homeX:x,homeY:y,passCD:0,tackleCD:0,wanderX:0,wanderY:0,supportX:0,supportY:0,
+    slotName:'',
     color:team==='left'?'#28a85a':'#e03040',hlColor:team==='left'?'#35d470':'#ff5060',disabled:false};
 }
 function makeBall(){return{x:W/2,y:H/2,vx:0,vy:0,r:BR,owner:null};}
@@ -633,10 +634,29 @@ function updateHuman(p){
     else if(t&&distE(p,ball)<TRAP_D+8&&ball.owner!==p.team){trap(p);passTo(p,t);showPassHint(t);}
   }
   if(p.kicking>0)p.kicking--;
-  if(mpMode==='guest'&&inputRef){set(inputRef,{x:p.x,y:p.y,fx:p.facing.x,fy:p.facing.y,carrying:p.carrying,kicking:p.kicking,ts:Date.now()}).catch(()=>{});}
+  if(mpMode==='guest'&&inputRef){
+    // Find our slot index so host knows which player to update
+    const allP=[...leftTeam,...rightTeam];
+    const myIdx=allP.findIndex(p=>p.isHuman&&!p.isRemote);
+    const myTeam=myIdx<leftTeam.length?'left':'right';
+    const myTeamIdx=myTeam==='left'?myIdx:myIdx-leftTeam.length;
+    set(inputRef,{x:p.x,y:p.y,fx:p.facing.x,fy:p.facing.y,carrying:p.carrying,kicking:p.kicking,team:myTeam,idx:myTeamIdx,ts:Date.now()}).catch(()=>{});
+  }
 }
 
-function applyRemoteInput(p,inp){if(!inp)return;p.x+=(inp.x-p.x)*0.4;p.y+=(inp.y-p.y)*0.4;p.facing.x=inp.fx||p.facing.x;p.facing.y=inp.fy||p.facing.y;p.carrying=inp.carrying||false;p.kicking=inp.kicking||0;if(p.carrying)attachBall(p);}
+function applyRemoteInput(p,inp){
+  if(!inp)return;
+  // inp may contain team+idx to find the right player
+  let target=p;
+  if(inp.team&&inp.idx!==undefined){
+    const arr=inp.team==='left'?leftTeam:rightTeam;
+    if(arr[inp.idx])target=arr[inp.idx];
+  }
+  target.x+=(inp.x-target.x)*0.4;target.y+=(inp.y-target.y)*0.4;
+  target.facing.x=inp.fx||target.facing.x;target.facing.y=inp.fy||target.facing.y;
+  target.carrying=inp.carrying||false;target.kicking=inp.kicking||0;
+  if(target.carrying)attachBall(target);
+}
 
 // ═══════ ALLY BOT ═══════
 function updateAllyBot(p){
@@ -790,8 +810,14 @@ function serializeState(){
 function applyRemoteState(s){
   if(!s)return;
   ball.x+=(s.ball.x-ball.x)*0.5;ball.y+=(s.ball.y-ball.y)*0.5;ball.vx=s.ball.vx;ball.vy=s.ball.vy;ball.owner=s.ball.owner||null;
-  s.left.forEach((d,i)=>{const p=leftTeam[i];if(!p)return;p.x+=(d.x-p.x)*0.5;p.y+=(d.y-p.y)*0.5;p.facing.x=d.fx;p.facing.y=d.fy;p.carrying=d.c===1;p.kicking=d.k;});
-  s.right.forEach((d,i)=>{if(i===0)return;const p=rightTeam[i];if(!p)return;p.x+=(d.x-p.x)*0.5;p.y+=(d.y-p.y)*0.5;p.facing.x=d.fx;p.facing.y=d.fy;p.carrying=d.c===1;p.kicking=d.k;});
+  s.left.forEach((d,i)=>{
+    const p=leftTeam[i];if(!p||p.isHuman)return; // skip our own player
+    p.x+=(d.x-p.x)*0.5;p.y+=(d.y-p.y)*0.5;p.facing.x=d.fx;p.facing.y=d.fy;p.carrying=d.c===1;p.kicking=d.k;
+  });
+  s.right.forEach((d,i)=>{
+    const p=rightTeam[i];if(!p||p.isHuman)return; // skip our own player
+    p.x+=(d.x-p.x)*0.5;p.y+=(d.y-p.y)*0.5;p.facing.x=d.fx;p.facing.y=d.fy;p.carrying=d.c===1;p.kicking=d.k;
+  });
   if(s.sL!==undefined){scoreL=s.sL;scoreR=s.sR;document.getElementById('scL').textContent=scoreL;document.getElementById('scR').textContent=scoreR;}
 }
 
@@ -858,7 +884,18 @@ async function joinRoom(code){
 
   // Watch for host starting game
   onValue(ref(db,`rooms/${roomCode}/status`),(snap)=>{
-    if(snap.val()==='playing')launchOnlineGame('guest');
+    if(snap.val()==='playing'){
+      // Read final lobby config from Firebase before launching
+      get(ref(db,`rooms/${roomCode}`)).then(roomSnap=>{
+        const rd=roomSnap.val();if(!rd)return;
+        // Apply final lobby to our local lobbySlots
+        if(rd.lobby){
+          rd.lobby.forEach((s,i)=>{lobbySlots[i]={...s,isMe:s.name===myName};});
+        }
+        const gsi=rd.guestSlotIdx!=null?rd.guestSlotIdx:-1;
+        launchOnlineGame('guest',gsi);
+      });
+    }
     if(snap.val()==='abandoned'&&gameRunning){gameRunning=false;clearInterval(timerInt);cleanupRoom();hideAll();show('oppLeft');}
   });
 
@@ -885,9 +922,20 @@ async function quickJoin(){
 }
 
 function startOnlineGame(){
-  // Host presses Start — mark room as playing and launch
   if(!roomRef)return;
-  set(ref(db,`rooms/${roomCode}/status`),'playing').catch(()=>{});
+  // Push final lobby config + guest's slot index to Firebase before starting
+  const finalLobby=lobbySlots.map(s=>({team:s.team,type:s.type,name:s.name||'',isMe:false}));
+  // Find which slot the guest is in (by name match)
+  const guestSlotIdx=lobbySlots.findIndex(s=>s.type==='human'&&s.name===guestName&&!s.isMe);
+  set(roomRef,{
+    status:'playing',
+    teamSize:onlineTeamSize,
+    hostName:myName,
+    guestName:guestName||'',
+    lobby:finalLobby,
+    guestSlotIdx:guestSlotIdx, // which slot the guest controls (-1 = no guest)
+    ts:serverTimestamp()
+  }).catch(()=>{});
   launchOnlineGame('host');
 }
 
@@ -903,44 +951,79 @@ function cleanupRoom(){
 
 function getOnlineTeamSize(){const sel=document.querySelector('#onlineSzRow .sz.sel');return sel?parseInt(sel.dataset.on):1;}
 
-function launchOnlineGame(role){
+// Build teams entirely from lobbySlots.
+// guestSlotIdx = which lobbySlots index the guest controls (-1 = no guest/bots only)
+// myRole = 'host'|'guest'
+function buildTeamsFromLobby(guestSlotIdx,myRole){
+  const n=onlineTeamSize;
+  const form=FORMATIONS[n];
+  leftTeam=[];rightTeam=[];
+  const greens=lobbySlots.filter(s=>s.team==='green'); // indices 0..n-1
+  const reds=lobbySlots.filter(s=>s.team==='red');     // indices n..2n-1
+
+  form.forEach((pos,i)=>{
+    const lx=PAD+GOAL_D+(pos.x*(W/2-PAD-GOAL_D)),ly=pos.y*H;
+    const rx=W-(PAD+GOAL_D)-(pos.x*(W/2-PAD-GOAL_D)),ry=pos.y*H;
+
+    const gs=greens[i]||{type:'empty',name:''};
+    const rs=reds[i]||{type:'empty',name:''};
+    const gsGlobal=i;           // global lobbySlots index for this green slot
+    const rsGlobal=n+i;         // global lobbySlots index for this red slot
+
+    // Left player
+    let lHuman=false,lRemote=false,lDisabled=false;
+    if(gs.type==='empty'){lDisabled=true;}
+    else if(gs.type==='bot'){lHuman=false;}
+    else if(gs.type==='human'){
+      if(myRole==='host'&&gs.isMe){lHuman=true;}          // host controls this
+      else if(myRole==='guest'&&gsGlobal===guestSlotIdx){lHuman=true;} // guest controls this
+      else{lRemote=true;}                                  // other human = remote
+    }
+    const lp=makePlayer(lx,ly,'left',lHuman,lRemote);
+    lp.disabled=lDisabled;lp.slotName=gs.name||'';
+    leftTeam.push(lp);
+
+    // Right player
+    let rHuman=false,rRemote=false,rDisabled=false;
+    if(rs.type==='empty'){rDisabled=true;}
+    else if(rs.type==='bot'){rHuman=false;}
+    else if(rs.type==='human'){
+      if(myRole==='host'&&rs.isMe){rHuman=true;}
+      else if(myRole==='guest'&&rsGlobal===guestSlotIdx){rHuman=true;}
+      else{rRemote=true;}
+    }
+    const rp=makePlayer(rx,ry,'right',rHuman,rRemote);
+    rp.disabled=rDisabled;rp.slotName=rs.name||'';
+    rightTeam.push(rp);
+  });
+  leftTeam.forEach(p=>{p.homeX=p.x;p.homeY=p.y;});
+  rightTeam.forEach(p=>{p.homeX=p.x;p.homeY=p.y;});
+  ball=makeBall();
+}
+
+function launchOnlineGame(role,guestSlotIdx){
   mpMode=role;
+  // guestSlotIdx: passed in for guest, loaded from Firebase for host
+  const gsi=(guestSlotIdx!==undefined)?guestSlotIdx:-1;
+
   scoreL=0;scoreR=0;gameTime=90;stamina=100;goalCD=0;paused=false;
   document.getElementById('scL').textContent='0';document.getElementById('scR').textContent='0';
   document.getElementById('timer').textContent='01:30';
-  if(role==='host'){hostName=myName;}
-  // Determine player positions from lobby
-  const greens=lobbySlots.filter(s=>s.team==='green');
-  const reds=lobbySlots.filter(s=>s.team==='red');
-  // Find which slot index is "me"
-  const myGreenIdx=greens.findIndex(s=>s.isMe);
-  const myRedIdx=reds.findIndex(s=>s.isMe);
-  spawnTeams(onlineTeamSize);
+  if(role==='host')hostName=myName;
+
+  buildTeamsFromLobby(gsi,role);
+
   if(role==='host'){
-    // Host is left team
-    leftTeam.forEach((p,i)=>{
-      const sl=greens[i];if(!sl)return;
-      if(sl.type==='bot'){p.isHuman=false;p.isRemote=false;}
-      else if(sl.type==='empty'){p.disabled=true;}
-      else if(sl.isMe){p.isHuman=true;}
-      else{p.isHuman=false;p.isRemote=true;}
-    });
-    rightTeam.forEach((p,i)=>{
-      const sl=reds[i];if(!sl)return;
-      if(sl.type==='bot'){p.isHuman=false;p.isRemote=false;}
-      else if(sl.type==='empty'){p.disabled=true;}
-      else{p.isHuman=false;p.isRemote=true;} // guest
-    });
+    // Find the remote player (guest slot) — could be anywhere in left or right team
+    const allP=[...leftTeam,...rightTeam];
+    const remotePlayer=allP.find(p=>p.isRemote);
     inputRef=ref(db,`rooms/${roomCode}/guestInput`);
     onValue(inputRef,(snap)=>{remoteState=snap.val();});
     syncInterval=setInterval(()=>{if(!gameRunning)return;set(ref(db,`rooms/${roomCode}/state`),serializeState()).catch(()=>{});},Math.round(1000/SYNC_HZ));
     document.getElementById('tnL').textContent=myName;
-    document.getElementById('tnR').textContent=guestName||'Guest';
-    document.getElementById('pingBadge').style.display='inline-block';
+    document.getElementById('tnR').textContent=guestName||'Bots';
+    document.getElementById('pingBadge').style.display=guestName?'inline-block':'none';
   }else{
-    // Guest is right team (right[0] = guest's human)
-    rightTeam[0].isHuman=true;rightTeam[0].isRemote=false;
-    leftTeam[0].isHuman=false;leftTeam[0].isRemote=true;
     document.getElementById('tnL').textContent=hostName||'Host';
     document.getElementById('tnR').textContent=myName;
     document.getElementById('pingBadge').style.display='inline-block';
@@ -1009,12 +1092,27 @@ function gameLoop(){
   ctx.clearRect(0,0,W,H);drawField();
   if(gameRunning&&!paused&&goalCD===0){
     if(mpMode==='local'){
-      updateHuman(leftTeam[0]);leftTeam.slice(1).forEach(p=>updateAllyBot(p));rightTeam.forEach(p=>updateCPUBot(p));updateBall();
+      updateHuman(leftTeam[0]);
+      leftTeam[0].slotName=myName;
+      leftTeam.slice(1).forEach(p=>updateAllyBot(p));
+      rightTeam.forEach(p=>updateCPUBot(p));
+      updateBall();
     }else if(mpMode==='host'){
-      updateHuman(leftTeam[0]);leftTeam.slice(1).forEach(p=>updateAllyBot(p));
-      applyRemoteInput(rightTeam[0],remoteState);rightTeam.slice(1).forEach(p=>updateCPUBot(p));updateBall();
+      // Update every player by their role
+      const allP=[...leftTeam,...rightTeam];
+      allP.forEach(p=>{
+        if(p.disabled)return;
+        if(p.isHuman)updateHuman(p);
+        else if(p.isRemote)applyRemoteInput(p,remoteState);
+        else if(p.team==='left')updateAllyBot(p);
+        else updateCPUBot(p);
+      });
+      updateBall();
     }else if(mpMode==='guest'){
-      applyRemoteState(remoteState);updateHuman(rightTeam[0]);
+      applyRemoteState(remoteState);
+      // Find and update our own human player
+      const myP=[...leftTeam,...rightTeam].find(p=>p.isHuman&&!p.isRemote);
+      if(myP)updateHuman(myP);
     }
     if(passHintTimer>0){passHintTimer--;if(passHintTimer===0)document.getElementById('passHint').classList.remove('on');}
   }
@@ -1022,18 +1120,14 @@ function gameLoop(){
   const carrier=allPlayers().find(p=>p.carrying);
   if(carrier){ctx.fillStyle=carrier.team==='left'?'rgba(245,200,0,.22)':'rgba(255,80,96,.22)';ctx.beginPath();ctx.arc(ball.x,ball.y,BR+8,0,Math.PI*2);ctx.fill();}
   drawBall(ball);
-  // Build per-player name tags from lobby slots when online
-  const greenNames=lobbySlots.filter(s=>s.team==='green').map(s=>s.type==='human'?s.name:'');
-  const redNames=lobbySlots.filter(s=>s.team==='red').map(s=>s.type==='human'?s.name:'');
-  leftTeam.forEach((p,i)=>{
-    const shortLabel=i===0?(mpMode==='local'?'YOU':myName.substring(0,3)):`B${i}`;
-    const nameTag=mpMode==='local'?(i===0?myName:null):(greenNames[i]||null);
-    drawPlayer(p,shortLabel,i===0&&mpMode!=='guest',nameTag);
-  });
-  rightTeam.forEach((p,i)=>{
-    const shortLabel=i===0?(mpMode==='guest'?myName.substring(0,3):'C1'):`C${i+1}`;
-    const nameTag=mpMode==='local'?null:(redNames[i]||null);
-    drawPlayer(p,shortLabel,i===0&&mpMode==='guest',nameTag);
+  // Draw all players with correct name tags
+  const allDraw=[...leftTeam,...rightTeam];
+  allDraw.forEach(p=>{
+    if(p.disabled)return;
+    const isMe=p.isHuman&&!p.isRemote;
+    const shortLabel=isMe?myName.substring(0,3):(p.isRemote?p.slotName.substring(0,3):(p.team==='left'?`B${leftTeam.indexOf(p)}`:`C${rightTeam.indexOf(p)+1}`));
+    const nameTag=(p.isHuman||p.isRemote)?p.slotName:null;
+    drawPlayer(p,shortLabel,isMe,nameTag);
   });
   requestAnimationFrame(gameLoop);
 }
